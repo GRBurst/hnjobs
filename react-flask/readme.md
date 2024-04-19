@@ -24,12 +24,10 @@ yarn install
 
 ## Run
 
-For the frontend, simply run `yarn dev`:
-```bash
-yarn dev
-```
-Check the output for the address under which the project is project is served.
-## Run
+### With Devbox
+Just run `devbox services up` from your terminal.
+
+### Without Devbox
 
 For the frontend, `cd` to `frontend` folder and run `yarn dev` or run `yarn` as follows:
 ```bash
