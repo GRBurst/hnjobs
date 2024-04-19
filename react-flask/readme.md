@@ -1,4 +1,4 @@
-# React Playground: React + Flask
+# React Playground: React + Vite + Flask
 
 ## Technologies + Frameworks
 
@@ -8,6 +8,27 @@
 - devbox for a reproducible dev environment
 - direnv to automatically load dev environment when entering project directory
 
+## Setup
+
+Install `devbox` and `direnv`.
+Allow `direnv` to automatically run the `.envrc`.
+
+```bash
+direnv allow
+```
+
+When `direnv` finished setting up the environment using devbox, simply run `yarn` from the `frondend` folder to install all dependencies:
+```bash
+yarn install
+```
+
+## Run
+
+For the frontend, simply run `yarn dev`:
+```bash
+yarn dev
+```
+Check the output for the address under which the project is project is served.
 ## Run
 
 For the frontend, `cd` to `frontend` folder and run `yarn dev` or run `yarn` as follows:
