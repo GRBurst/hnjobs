@@ -1,0 +1,174 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "python310Packages.flask@latest": {
+      "last_modified": "2023-12-13T22:54:10Z",
+      "resolved": "github:NixOS/nixpkgs/fd04bea4cbf76f86f244b9e2549fca066db8ddff#python310Packages.flask",
+      "source": "devbox-search",
+      "version": "2.3.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/x23p4z64kzi61rdk2jykc788ilqj77jk-python3.10-flask-2.3.3",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/93m2dp24dy2wjvcxkgqdjmbzn4jii511-python3.10-flask-2.3.3-dist"
+            }
+          ],
+          "store_path": "/nix/store/x23p4z64kzi61rdk2jykc788ilqj77jk-python3.10-flask-2.3.3"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/w30q0m2jx43iipxw8lkxnfcf7l9zhi2m-python3.10-flask-2.3.3",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/lrbdfzn6fd038wc9jyy5xl0j4calqify-python3.10-flask-2.3.3-dist"
+            }
+          ],
+          "store_path": "/nix/store/w30q0m2jx43iipxw8lkxnfcf7l9zhi2m-python3.10-flask-2.3.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/phq5blxb6n2c6vvgshvk5aj1w932krvn-python3.10-flask-2.3.3",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/w1xg1cgkb18v89slgj4g5f22cv7gp5p0-python3.10-flask-2.3.3-dist"
+            }
+          ],
+          "store_path": "/nix/store/phq5blxb6n2c6vvgshvk5aj1w932krvn-python3.10-flask-2.3.3"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/b54vjn6jzrnvgw6wb57lmdnph8dh6ipj-python3.10-flask-2.3.3",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/yin372ygf3k1rcda1lvzag4p125dcizw-python3.10-flask-2.3.3-dist"
+            }
+          ],
+          "store_path": "/nix/store/b54vjn6jzrnvgw6wb57lmdnph8dh6ipj-python3.10-flask-2.3.3"
+        }
+      }
+    },
+    "python@3.10": {
+      "last_modified": "2024-03-27T09:47:59Z",
+      "plugin_version": "0.0.3",
+      "resolved": "github:NixOS/nixpkgs/2230a20f2b5a14f2db3d7f13a2dc3c22517e790b#python310",
+      "source": "devbox-search",
+      "version": "3.10.14",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hrg1v4jnfprcnw5wbyx32ghas7fpbf1x-python3-3.10.14",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/hrg1v4jnfprcnw5wbyx32ghas7fpbf1x-python3-3.10.14"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/10iqd7n59c3aznxlqwxk7s0qpvwpkkv6-python3-3.10.14",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/6iardl19cpfl28y2ibbz1k64qg9fgk8d-python3-3.10.14-debug"
+            }
+          ],
+          "store_path": "/nix/store/10iqd7n59c3aznxlqwxk7s0qpvwpkkv6-python3-3.10.14"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/klrpgzac7vw4k1g5sia83fkzb63w3g6r-python3-3.10.14",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/klrpgzac7vw4k1g5sia83fkzb63w3g6r-python3-3.10.14"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qq3101yfil8kpbifljs2fnppf6857y8c-python3-3.10.14",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/l80insbr2cawr8cpy2bdip8hin9jjaxz-python3-3.10.14-debug"
+            }
+          ],
+          "store_path": "/nix/store/qq3101yfil8kpbifljs2fnppf6857y8c-python3-3.10.14"
+        }
+      }
+    },
+    "yarn@latest": {
+      "last_modified": "2024-03-22T11:26:23Z",
+      "resolved": "github:NixOS/nixpkgs/a3ed7406349a9335cb4c2a71369b697cecd9d351#yarn",
+      "source": "devbox-search",
+      "version": "1.22.22",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7rv0zj74rm049vchr7c4hiisw4pigs85-yarn-1.22.22",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7rv0zj74rm049vchr7c4hiisw4pigs85-yarn-1.22.22"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8wq8jz5dbq1q3gdnh22d47bf79fkaasy-yarn-1.22.22",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8wq8jz5dbq1q3gdnh22d47bf79fkaasy-yarn-1.22.22"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mp2xyil9p9d1fva75zr0phxbv7312avr-yarn-1.22.22",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mp2xyil9p9d1fva75zr0phxbv7312avr-yarn-1.22.22"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/aivn7biys6sbiq9rnpclbk1l81sqk2pa-yarn-1.22.22",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/aivn7biys6sbiq9rnpclbk1l81sqk2pa-yarn-1.22.22"
+        }
+      }
+    }
+  }
+}
