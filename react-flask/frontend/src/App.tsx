@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import axios from 'axios';
 import './App.css'
+import { TodoList } from "./TodoList.tsx";
 
 async function doLogin(username: string, password: string): Promise<void> {
     try {
@@ -20,6 +21,7 @@ async function doLogin(username: string, password: string): Promise<void> {
     }
 }
 
+
 function App() {
   const [count, setCount] = useState(0)
   const [login, setLogin] = useState(false)
@@ -35,26 +37,31 @@ function App() {
         </a>
       </div>
       <h1>BOOM 💥: Vite + React</h1>
-      <div style={{display: "flex", flexDirection: "column"}}>
-        <div className="card">
-            <button onClick={async () => {
-                await doLogin("admin", "secret");
-                setLogin(true);
-                console.log(`login state: ${login} with localstorage token ${localStorage.getItem("token")}`)
-            }}>
-                Login
-            </button>
-            <p>
-            Login stuff
-            </p>
+      <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+        <div style={{display: "flex", flexDirection: "column"}}>
+            <TodoList />
         </div>
-        <div className="card">
-            <button onClick={() => setCount((count) => count + 1)}>
-            count is {count}
-            </button>
-            <p>
-            Edit <code>src/App.tsx</code> and save to test HMR
-            </p>
+        <div style={{display: "flex", flexDirection: "column"}}>
+            <div className="card">
+                <button onClick={async () => {
+                    await doLogin("admin", "secret");
+                    setLogin(true);
+                    console.log(`login state: ${login} with localstorage token ${localStorage.getItem("token")}`)
+                }}>
+                    Login
+                </button>
+                <p>
+                Login stuff
+                </p>
+            </div>
+            <div className="card">
+                <button onClick={() => setCount((count) => count + 1)}>
+                count is {count}
+                </button>
+                <p>
+                Edit <code>src/App.tsx</code> and save to test HMR
+                </p>
+            </div>
         </div>
       </div>
       <p className="read-the-docs">
