@@ -13,10 +13,11 @@ function TodoList() {
     return (
         <>
             <List
+                className="todo-list"
                 itemLayout="horizontal"
                 dataSource={[...allItems]}
                 renderItem={(item) => (
-                    <List.Item actions={[<a key="todo-delete" onClick={() => {
+                    <List.Item className="todo-item" actions={[<a key="todo-delete" onClick={() => {
                         setAllItems(allItems.filter(e => e != item))
                     }}><DeleteOutlined /></a>]}>
                          {item}
