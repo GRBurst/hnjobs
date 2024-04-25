@@ -1,0 +1,14 @@
+environment:
+  - "FORCE_COLOR=1"
+processes:
+
+  yarn-install:
+    command: yarn --cwd ./frontend install --color=always
+
+  vite-dev:
+    command: yarn --cwd ./frontend dev --port 5173 --strictPort
+    ports:
+      - 5173:5173
+    depends_on:
+      yarn-install:
+        condition: process_completed_successfully
