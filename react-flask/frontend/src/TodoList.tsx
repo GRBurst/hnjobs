@@ -7,7 +7,7 @@ import { TodoItem } from "./TodoItem.tsx";
 
 
 function TodoList() {
-    const [allItems, setAllItems] = useState([<TodoItem isChecked={Math.random() < 0.5} description="foo" />, <TodoItem isChecked={Math.random() < 0.5} description="bar" />])
+    const [allItems, setAllItems] = useState([<TodoItem initChecked={Math.random() < 0.5} description="foo" />, <TodoItem initChecked={Math.random() < 0.5} description="bar" />])
     const [todoInput, setTodoInput] = useState<string | null>(null)
 
     return (
