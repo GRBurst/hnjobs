@@ -1,19 +1,44 @@
 import { useState, useEffect, useMemo } from 'react'
 import axios from 'axios';
-import {  List } from "antd";
-import { Flex } from "antd";
-import { Col, Row } from "antd";
+import {  Flex, List } from "antd";
 import './HnJobs.css'
 import { QueryChange } from 'rxfire/database';
-import { pipe, Effect, Array } from "effect"
+import { pipe, Effect } from "effect"
+import { HashSet as HSet } from "effect"
+import type { HashSet } from "effect/HashSet"
+import sanitizeHtml from 'sanitize-html';
 
-import Item from ".models/Item"
+// import { promises as fsPromises } from 'fs';
+
+
+import { TagFilter, Tag as FilterTag } from "./components/TagFilter"
+import Item from "./models/Item"
 
 import { DatabaseProvider, useDatabase, useDatabaseList, useFirebaseApp  } from 'reactfire';
 import { getDatabase, startAt, endAt, query, get, child, ref, onChildAdded, onChildChanged, onChildRemoved, onValue, DatabaseReference, DataSnapshot, limitToFirst } from "firebase/database";
 
+// const asyncWriteFile = async (filename: string, data: string) => {
+//     try {
+//       await fsPromises.writeFile(filename, data, {
+//         flag: 'w',
+//       });
+  
+//       const contents = await fsPromises.readFile(
+//         filename,
+//         'utf-8',
+//       );
+//       console.log(contents.slice(0, 100));
+  
+//       return contents;
+//     } catch (err) {
+//       console.log(err);
+//       return `Couldn't read / write file ${filename}`;
+//     }
+//   }
+  
+
 // Call api directly (without firebase)
-async function getCurrentHnJobPosts(): Promise<number[]> {
+const getCurrentHnJobPosts = async (): Promise<number[]> => {
     try {
         const response = await axios.get("https://hacker-news.firebaseio.com/v0/jobstories.json");
         const jobs = response.data
@@ -26,7 +51,7 @@ async function getCurrentHnJobPosts(): Promise<number[]> {
 }
 
 // Call api directly (without firebase)
-async function getCurrentAskHnJobPosts(): Promise<number[]> {
+const getCurrentAskHnJobPosts = async (): Promise<number[]> => {
     try {
         const response = await axios.get("https://hacker-news.firebaseio.com/v0/jobstories.json");
         const jobs = response.data
@@ -39,7 +64,9 @@ async function getCurrentAskHnJobPosts(): Promise<number[]> {
     return Promise.resolve([])
 }
 
-function getItemFromId(dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> {
+const writeComments = async (data: string): Promise<void> => axios.post("http://localhost:5179", data);
+
+const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
     console.log(`itemId: ${itemId}`)
     const existsOption = (job: DataSnapshot) => job.exists() ? Effect.succeed(job.val()) : Effect.fail(new Error("No data"));
@@ -58,13 +85,15 @@ const getItemsFromQueryIds = (dbRef: DatabaseReference, itemIds: QueryChange[]):
     return getItemsFromIds(dbRef, itemIds, idHolder => idHolder.snapshot.val())
 }
 
-const getKidIdsFromItems = (dbRef: DatabaseReference, kidsArray: number[][]) => Effect.all(
+const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => Effect.all(
         kidsArray.map(itemKids => getItemsFromIds(dbRef, itemKids, x => x))
     )
 
 function YcJobsList() {
     const [currentJobPosts, setCurrentJobPosts] = useState<Item[]>([])
     const [currentAskPosts, setCurrentAskPosts] = useState<Item[][]>([])
+    const [activeFilters, setActiveFilters] = useState<HashSet<string>>(HSet.empty())
+    const allFilterTags = HSet.fromIterable(["Remote", "Scala"])
     const db = useDatabase();
     const dbRef = ref(useDatabase());
     const jobsRef = ref(db, '/v0/jobstories');
@@ -81,7 +110,9 @@ function YcJobsList() {
 
     const jobsPostList = useMemo(() => (jobStatus === 'success') ? allJobs : [], [jobStatus, allJobs])
     // const asksPostList = useMemo(() => (askStatus === 'success') ? allAsks : [], [askStatus, allAsks])
-    const asksPostList = useMemo(() => [39894820], [])
+
+    // const jobsPostList = useMemo(() => ["A", "B", C])
+    const asksPostList = useMemo(() => [39894820], []) // hardcoded since it is not in the firebase api anymore
 
     useEffect(() => {
         Effect.runPromise(getItemsFromQueryIds(dbRef, jobsPostList))
@@ -95,41 +126,58 @@ function YcJobsList() {
         Effect.runPromise(
             pipe(
                 getItemsFromIds(dbRef, asksPostList, x => x),
-                Effect.tap(asks => console.log("effect asks", asks)), // Array.filterMap(((ask) => ask.by == "whoishiring" && ask.title.toLowerCase().includes("who is hiring")))
+                Effect.tap(asks => console.log("effect asks", asks)),
                 Effect.map(asks => asks.filter((ask: Item) => ask.by == "whoishiring" && ask.title.toLowerCase().includes("who is hiring"))),
                 Effect.tap(asks => console.log("filtered asks", asks)),
-                Effect.map(asks => asks.map((ask: Item) => ask.kids?.slice(0, 10))),
+                Effect.map(asks => asks.map((ask: Item) => ask.kids ?? [])),
                 Effect.tap(itemKids => console.log("mapped kids", itemKids)),
-                Effect.flatMap(itemKids => getKidIdsFromItems(dbRef, itemKids)),
+                Effect.flatMap(itemKids => getKidItemsFromIds(dbRef, itemKids)),
                 Effect.tap(itemKids => console.log("combined kids", itemKids)),
+                // Effect.map(asks => asks[0].filter(ask => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (ask.text != undefined && ask.text.includes(ele)), true)))
             ))
             .then((asks: Item[][]) => {
                 console.log("asks: ", asks)
                 setCurrentAskPosts(asks)
             })
+            // .then(() => 
+            //     // axios.post("http://localhost:5179/comments", {"data": currentAskPosts.flat().map(ask => ask.text).join(" ")})
+            //     console.log(currentAskPosts)
+            //     // asyncWriteFile("/tmp/comments.txt", "foobar")
+            // )
+    // }, [dbRef, asksPostList, activeFilters])
     }, [dbRef, asksPostList])
     
-    return <Flex gap="middle">
-            <List
-                className="job-list"
-                itemLayout="horizontal"
-                dataSource={currentJobPosts}
-                renderItem={(job) => (
-                    <List.Item key={job.id} className="job-list-item" >
-                        {job.id}: {job.title},<br />
-                        {JSON.stringify({job})}
-                    </List.Item>
-                )} />
-            <List
-                className="job-list"
-                itemLayout="horizontal"
-                dataSource={currentAskPosts[0]}
-                renderItem={(ask) => (
-                    <List.Item className="job-list-item" >
-                            {ask.id}: {ask.text},<br />
-                    </List.Item>
-                )} />
-        </Flex>
+    return <>
+            {<TagFilter 
+                // tags={allFilterTags.map(tag => activeFilters.includes(tag) ? (new FilterTag(tag.name, isActive = true)) : tag)}
+                allTags={allFilterTags}
+                activeTags={allFilterTags.pipe(HSet.intersection(activeFilters))}
+                onActive={(tagName: string) => setActiveFilters(HSet.fromIterable([...activeFilters, tagName]))}
+                onInactive={(tagName: string) => setActiveFilters(activeFilters.pipe(HSet.filter(item => item !== tagName)))}
+                />
+            }
+            <Flex gap="middle">
+                <List
+                    className="job-list"
+                    itemLayout="horizontal"
+                    dataSource={currentJobPosts}
+                    renderItem={(job) => (
+                        <List.Item key={job.id} className="job-list-item" >
+                            {job.id}: {job.title}
+                        </List.Item>
+                    )} />
+                <List
+                    className="job-list"
+                    itemLayout="horizontal"
+                    // dataSource={currentAskPosts[0]}
+                    dataSource={currentAskPosts[0]?.filter(ask => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (ask.text != undefined && ask.text.includes(ele)), true))}
+                    renderItem={(ask) => (
+                        <List.Item key={ask.id} className="job-list-item" >
+                            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(ask.text)}} />
+                        </List.Item>
+                    )} />
+            </Flex>
+        </>
 }
 
 function HnJobs() {

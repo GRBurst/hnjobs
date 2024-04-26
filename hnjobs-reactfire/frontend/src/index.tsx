@@ -20,6 +20,6 @@ root.render(
   <React.StrictMode>
     <FirebaseAppProvider firebaseConfig={firebaseConfig}>
         <HnJobs />
-    </FirebaseAppProvider>,
-  </React.StrictMode>,
+    </FirebaseAppProvider>
+  </React.StrictMode>
 );
