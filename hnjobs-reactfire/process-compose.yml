@@ -12,3 +12,8 @@ processes:
     depends_on:
       yarn-install:
         condition: process_completed_successfully
+
+  uvicorn-dev:
+    command: uvicorn --port 5179 --app-dir ./backend main:app --reload
+    ports:
+      - 5173:5173

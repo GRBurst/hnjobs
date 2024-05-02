@@ -3,7 +3,11 @@
   "packages": [
     "python@3.10",
     "yarn@latest",
-    "python310Packages.flask@latest"
+    "python310Packages.fastapi@latest",
+    "python310Packages.uvicorn@latest",
+    "sqlite@latest",
+    "python310Packages.sqlalchemy@latest",
+    "python310Packages.pydantic@latest"
   ],
   "shell": {
     "init_hook": [
