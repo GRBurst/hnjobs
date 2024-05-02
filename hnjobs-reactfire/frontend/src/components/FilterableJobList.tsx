@@ -6,26 +6,42 @@ import type { HashSet } from "effect/HashSet"
 import sanitizeHtml from "sanitize-html"
 
 
+import { useDatabase, useDatabaseList  } from 'reactfire'
+import { QueryConstraint, query, ref, DatabaseReference } from "firebase/database"
+
 import { TagFilter } from "../components/TagFilter"
 import Item from "../models/Item"
 import { getComments, writeComments } from '../utils/persistence'
 import { getItemsFromQueryIds } from '../utils/hn'
 
-import { useDatabase, useDatabaseList  } from 'reactfire'
-import { QueryConstraint, query, ref, DatabaseReference } from "firebase/database"
+const getHighlightedText = (text: string | undefined, highlights: string[]) => {
+    if (highlights === undefined || highlights.length == 0 || text === undefined) {
+        return text ?? ""
+    }
+
+    const regStr = `(${highlights.join("|")})`
+    const parts = text.split(new RegExp(regStr, 'g'));
+
+    console.log(regStr)
+    console.log(parts)
+    return (parts?.map((textWord, i) => 
+            highlights.includes(textWord) ? `<mark key=${i} className="search-terms-highlight">${textWord}</mark>` : textWord
+    ).join(""))
+}
 
 interface ItemListProps {
     items : Item[]
+    filters: string[]
 }
 const ItemList = ({
-    items
+    items, filters
 }: ItemListProps) => <List
         className="job-list"
         itemLayout="horizontal"
-        dataSource={items}
+        dataSource={items.filter(ele => ele.text !== undefined && ele.text != "")}
         renderItem={(item) => (
             <List.Item key={item.id} className="job-list-item" >
-                <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.text)}} />
+                <div dangerouslySetInnerHTML={{ __html: getHighlightedText(sanitizeHtml(item.text), filters)}} />
             </List.Item>
         )}
     />
@@ -49,7 +65,10 @@ const FilterableLocalList = ({
                 onActive={(tagName: string) => setActiveFilters(HSet.fromIterable([...activeFilters, tagName]))}
                 onInactive={(tagName: string) => setActiveFilters(activeFilters.pipe(HSet.filter(item => item !== tagName)))}
                 />
-            <ItemList items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()} />
+            <ItemList 
+                items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()}
+                filters={Array.from(activeFilters)}
+            />
         </>
     )
 }
@@ -87,7 +106,7 @@ const FilterableOnlineMultiList = ({
                     console.log("items: ", receivedItems)
                     setAllItems(receivedItems)
                     if(writeToFile) {
-                        writeComments(receivedItems)
+                        Effect.runPromise(writeComments(receivedItems))
                     }
             })
     }, [dbRef, itemList, receiveProgram, writeToFile])
@@ -100,7 +119,10 @@ const FilterableOnlineMultiList = ({
                     onActive={(tagName: string) => setActiveFilters(HSet.fromIterable([...activeFilters, tagName]))}
                     onInactive={(tagName: string) => setActiveFilters(activeFilters.pipe(HSet.filter(item => item !== tagName)))}
                     />
-                <ItemList items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()} />
+                <ItemList
+                    items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()}
+                    filters={Array.from(activeFilters)}
+                />
             </>
         )
 
