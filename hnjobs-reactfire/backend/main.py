@@ -1,4 +1,5 @@
 from typing import Union
+import json
 
 from fastapi import FastAPI, Request
 
@@ -18,7 +19,7 @@ async def write_comments(request: Request):
     json_data = await request.json()
 
     with open("comments.txt", "w") as file:
-        file.write(json_data["data"])
+        file.write(json.dumps(json_data))
 
     return {"success": 200}
 

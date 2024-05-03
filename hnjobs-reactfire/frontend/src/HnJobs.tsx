@@ -11,8 +11,10 @@ import Item from "./models/Item"
 import { DatabaseProvider, useFirebaseApp  } from 'reactfire';
 import { getDatabase, DatabaseReference } from "firebase/database";
 
-
-const YcJobsList = () => {
+interface YcJobsListProps {
+    local: boolean
+}
+const YcJobsList = ({local}) => {
     const allFilterTags = HSet.fromIterable(["Remote", "Scala", "Haskell", "Kubernetes"])
 
     //ids:
@@ -31,12 +33,13 @@ const YcJobsList = () => {
             Effect.tap(itemKids => console.log("combined kids", itemKids)),
         )
     
-    return <FilterableOnlineMultiList
+    return local ? <FilterableLocalList filterTags={allFilterTags} /> : (<FilterableOnlineMultiList
             refEndpoint="/v0/askstories"
             queryConstraints={[]} // startAt(50), endAt(100)
             receiveProgram={askJobsProgram}
             filterTags={allFilterTags}
-        />
+            writeToFile={true}
+        />)
 }
 
 function HnJobs() {
@@ -46,7 +49,7 @@ function HnJobs() {
     return (
         <DatabaseProvider sdk={database}>
             <h1>HackerNews Jobs 💥</h1>
-            <YcJobsList />
+            <YcJobsList local={true}/>
         </DatabaseProvider>
     );
 }

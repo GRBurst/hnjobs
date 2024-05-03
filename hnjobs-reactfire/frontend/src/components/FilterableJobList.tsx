@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import {  List } from "antd";
-import { Effect } from "effect"
+import { Data, Effect } from "effect"
 import { HashSet as HSet } from "effect"
 import type { HashSet } from "effect/HashSet"
 import sanitizeHtml from "sanitize-html"
@@ -10,9 +10,9 @@ import { useDatabase, useDatabaseList  } from 'reactfire'
 import { QueryConstraint, query, ref, DatabaseReference } from "firebase/database"
 
 import { TagFilter } from "../components/TagFilter"
-import Item from "../models/Item"
+import { Item, AskHn } from "../models/Item"
 import { getComments, writeComments } from '../utils/persistence'
-import { getItemsFromQueryIds } from '../utils/hn'
+import { getItemsFromQueryIds, itemFilter } from '../utils/hn'
 
 const getHighlightedText = (text: string | undefined, highlights: string[]) => {
     if (highlights === undefined || highlights.length == 0 || text === undefined) {
@@ -32,15 +32,17 @@ const getHighlightedText = (text: string | undefined, highlights: string[]) => {
 interface ItemListProps {
     items : Item[]
     filters: string[]
+    parentFilter: number | undefined
 }
 const ItemList = ({
-    items, filters
+    items, filters, parentFilter
 }: ItemListProps) => <List
         className="job-list"
         itemLayout="horizontal"
-        dataSource={items.filter(ele => ele.text !== undefined && ele.text != "")}
+        dataSource={items ? itemFilter(items, filters, parentFilter) : []}
         renderItem={(item) => (
-            <List.Item key={item.id} className="job-list-item" >
+            <List.Item key={item.id} className="job-list-item">
+                {/* <div style={{display: "flex"}} dangerouslySetInnerHTML={{ __html: getHighlightedText(sanitizeHtml(item.text), filters)}} /> */}
                 <div dangerouslySetInnerHTML={{ __html: getHighlightedText(sanitizeHtml(item.text), filters)}} />
             </List.Item>
         )}
@@ -53,9 +55,13 @@ const FilterableLocalList = ({
     filterTags
 }: FilterableLocalListProps) => {
     const [allItems, setAllItems] = useState<Item[][]>([[]])
+    const [parentItem, setParentItem] = useState<number | undefined>(undefined)
     const [activeFilters, setActiveFilters] = useState<HashSet<string>>(HSet.empty())
     useMemo(() => {
-        Effect.runPromise(getComments()).then((receivedItems: Item[]) => setAllItems([receivedItems]))
+        Effect.runPromise(getComments()).then((received: AskHn[]) => {
+            setParentItem(received[0].id)
+            setAllItems([received[0].comments])
+        })
     }, [])
     return (
         <>
@@ -66,8 +72,9 @@ const FilterableLocalList = ({
                 onInactive={(tagName: string) => setActiveFilters(activeFilters.pipe(HSet.filter(item => item !== tagName)))}
                 />
             <ItemList 
-                items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()}
+                items={itemFilter(allItems[0] ?? [], activeFilters)}
                 filters={Array.from(activeFilters)}
+                parentFilter={parentItem}
             />
         </>
     )
@@ -88,6 +95,7 @@ const FilterableOnlineMultiList = ({
     writeToFile = false
 }: FilterableOnlineMultiListProps) => {
     const [allItems, setAllItems] = useState<Item[][]>([[]])
+    const [parentItem, setParentItem] = useState<number | undefined>(undefined)
     const [activeFilters, setActiveFilters] = useState<HashSet<string>>(HSet.empty())
 
     const db = useDatabase();
@@ -120,8 +128,9 @@ const FilterableOnlineMultiList = ({
                     onInactive={(tagName: string) => setActiveFilters(activeFilters.pipe(HSet.filter(item => item !== tagName)))}
                     />
                 <ItemList
-                    items={allItems[0]?.filter(item => Array.from(HSet.values(activeFilters)).reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)).reverse()}
+                    items={itemFilter(allItems[0] ?? [], activeFilters)}
                     filters={Array.from(activeFilters)}
+                    parentFilter={undefined}
                 />
             </>
         )

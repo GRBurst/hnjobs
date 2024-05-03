@@ -1,9 +1,12 @@
 import { QueryChange } from "rxfire/database"
 import { pipe, Effect } from "effect"
 
-import Item from "../models/Item"
+import { HashSet as HSet } from "effect"
+import type { HashSet } from "effect/HashSet"
 
 import { get, child, DatabaseReference, DataSnapshot } from "firebase/database";
+
+import { Item } from "../models/Item"
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
@@ -28,4 +31,20 @@ const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => 
         kidsArray.map(itemKids => getItemsFromIds(dbRef, itemKids, x => x))
     )
 
-export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds}
+const itemFilter = (items: Item[], tagFilters: Iterable<string>, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
+    .filter(item => 
+        item.text !== undefined
+        && item.text != ""
+        && !(filterFlagged && item.text?.toLocaleLowerCase().includes("[flagged]"))
+        && parentFilter !== undefined ? item.parent == parentFilter : true
+    )
+    .filter(item => 
+        Array.from(tagFilters)
+            .reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)
+    )
+    .reverse()
+
+        // Array.from(HSet.values(tagFilters))
+        //     .reduce<boolean>((acc, ele) => acc && (item.text != undefined && item.text.includes(ele)), true)
+export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, itemFilter}
+
