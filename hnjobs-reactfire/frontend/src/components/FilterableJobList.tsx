@@ -9,46 +9,40 @@ import { useDatabase, useDatabaseList  } from 'reactfire'
 import { QueryConstraint, query, ref, DatabaseReference } from "firebase/database"
 
 import { TagFilterBar } from "./TagFilterBar"
+import { CustomFilters } from './CustomFilters'
 import { Item, AskHn } from "../models/Item"
 import { TagFilters, TagFilter } from "../models/TagFilter"
 import { getComments, writeComments } from '../utils/persistence'
-import { getItemsFromQueryIds, itemFilter } from '../utils/hn'
+import { filterByRegex, getItemsFromQueryIds, itemFilter } from '../utils/hn'
 
-const getHighlightedText = (text: string | undefined, highlights: string[]) => {
+const getHighlightedText = (text: string | undefined, highlights: RegExp[]) => {
     if (highlights === undefined || highlights.length == 0 || text === undefined) {
         return text ?? ""
     }
 
-    const regStr = `(${highlights.join("|")})`
-    const parts = text.split(new RegExp(regStr, 'g'));
-
-    console.log(regStr)
-    console.log(parts)
+    const parts = text.split(" ")
 
     const highlightedText = parts?.map((textWord, i) => 
-            highlights.includes(textWord) ? `<mark key=${i} className="search-terms-highlight">${textWord}</mark>` : textWord
-    ).join("")
+        filterByRegex(textWord, highlights) ? `<mark key=${i} className="search-terms-highlight">${textWord}</mark>` : textWord
+    ).join(" ")
 
-    // const firstLineIndex = highlightedText.indexOf("\n")
-    // const firstLine = highlightedText.slice(0, firstLineIndex)
-    // const followingLines = highlightedText.slice(firstLineIndex)
-    // return `<strong>${firstLine}</strong>\n${followingLines}`
     return highlightedText
 }
 
 interface ItemListProps {
     items : Item[]
     tagFilters: TagFilter[]
+    searchFilter: string | undefined
     parentFilter: number | undefined
 }
 const ItemList = ({
-    items, tagFilters: filters, parentFilter
+    items, tagFilters, searchFilter, parentFilter
 }: ItemListProps) => <List
         className="job-list"
         itemLayout="horizontal"
-        dataSource={items ? itemFilter(items, filters, parentFilter) : []}
+        dataSource={items ? itemFilter(items, tagFilters, searchFilter, parentFilter) : []}
         renderItem={(item) => {
-            const highlightedText = getHighlightedText(sanitizeHtml(item.text ?? ""), filters.map(f => f.name))
+            const highlightedText = getHighlightedText(sanitizeHtml(item.text ?? ""), searchFilter !== undefined ? [...tagFilters.map(f => f.pattern), RegExp(searchFilter)] : tagFilters.map(f => f.pattern))
             return (
                 <List.Item key={item.id} className="job-list-item">
                     <div>
@@ -59,6 +53,45 @@ const ItemList = ({
             )
         }}
     />
+
+
+interface FilterableListProps {
+    items: Item[][]
+    parentItem: number | undefined
+    filterTags: TagFilters
+}
+const FilterableList = ({
+    parentItem,
+    items,
+    filterTags
+}: FilterableListProps) => {
+    const [allTagFilters, setAllTagFilters] = useState<TagFilters>(filterTags)
+    const [activeTagFilters, setActiveTagFilters] = useState<TagFilters>(HashSet.empty())
+    const [searchFilter, setSearchFilter] = useState<string | undefined>(undefined)
+
+
+    return (
+        <>
+            <CustomFilters
+                onTagAdd={(tag: TagFilter) => setAllTagFilters(HashSet.fromIterable([...allTagFilters, tag]))}
+                onSearch={(needle: string | undefined) => setSearchFilter(needle)}
+            />
+            <TagFilterBar 
+                allTags={allTagFilters}
+                activeTags={HashSet.intersection(allTagFilters, activeTagFilters)}
+                onActive={(tag: TagFilter) => setActiveTagFilters(HashSet.fromIterable([...activeTagFilters, tag]))}
+                onInactive={(tag: TagFilter) => setActiveTagFilters(HashSet.filter(activeTagFilters, item => item !== tag))}
+                />
+            <ItemList 
+                items={itemFilter(items[0] ?? [], activeTagFilters, searchFilter)}
+                tagFilters={Array.from(activeTagFilters)}
+                searchFilter={searchFilter}
+                parentFilter={parentItem}
+            />
+        </>
+    )
+}
+
                     
 interface FilterableLocalListProps {
     filterTags: TagFilters
@@ -68,28 +101,20 @@ const FilterableLocalList = ({
 }: FilterableLocalListProps) => {
     const [allItems, setAllItems] = useState<Item[][]>([[]])
     const [parentItem, setParentItem] = useState<number | undefined>(undefined)
-    const [activeFilters, setActiveFilters] = useState<TagFilters>(HashSet.empty())
+
     useMemo(() => {
         Effect.runPromise(getComments()).then((received: AskHn[]) => {
             setParentItem(received[0].id)
             setAllItems([received[0].comments])
         })
     }, [])
+
     return (
-        <>
-            <TagFilterBar 
-                allTags={filterTags}
-                activeTags={filterTags.pipe(HashSet.intersection(activeFilters))}
-                onActive={(tag: TagFilter) => setActiveFilters(HashSet.fromIterable([...activeFilters, tag]))}
-                onInactive={(tag: TagFilter) => setActiveFilters(activeFilters.pipe(HashSet.filter(item => item !== tag)))}
-                />
-            <ItemList 
-                items={itemFilter(allItems[0] ?? [], activeFilters)}
-                tagFilters={Array.from(activeFilters)}
-                parentFilter={parentItem}
-            />
-        </>
-    )
+        <FilterableList
+            parentItem={parentItem}
+            items={allItems} 
+            filterTags={filterTags} 
+        />)
 }
  
 interface FilterableOnlineMultiListProps {
@@ -108,7 +133,6 @@ const FilterableOnlineMultiList = ({
 }: FilterableOnlineMultiListProps) => {
     const [allItems, setAllItems] = useState<Item[][]>([[]])
     const [parentItem, setParentItem] = useState<number | undefined>(undefined)
-    const [activeFilters, setActiveFilters] = useState<TagFilters>(HashSet.empty())
 
     const db = useDatabase();
     const dbRef = ref(useDatabase());
@@ -131,22 +155,12 @@ const FilterableOnlineMultiList = ({
             })
     }, [dbRef, itemList, receiveProgram, writeToFile])
 
-        return (
-            <>
-                <TagFilterBar 
-                    allTags={filterTags}
-                    activeTags={filterTags.pipe(HashSet.intersection(activeFilters))}
-                    onActive={(tag: TagFilter) => setActiveFilters(HashSet.fromIterable([...activeFilters, tag]))}
-                    onInactive={(tag: TagFilter) => setActiveFilters(activeFilters.pipe(HashSet.filter(item => item !== tag)))}
-                    />
-                <ItemList
-                    items={itemFilter(allItems[0] ?? [], activeFilters)}
-                    tagFilters={Array.from(activeFilters)}
-                    parentFilter={undefined}
-                />
-            </>
-        )
-
+    return (
+        <FilterableList
+            parentItem={parentItem}
+            items={allItems} 
+            filterTags={filterTags} 
+        />)
 }
 FilterableOnlineMultiList.defaultProps = {
     writeToFile: true

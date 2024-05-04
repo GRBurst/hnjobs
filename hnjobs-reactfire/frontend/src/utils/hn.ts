@@ -29,18 +29,19 @@ const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => 
         kidsArray.map(itemKids => getItemsFromIds(dbRef, itemKids, x => x))
     )
 
-const itemFilter = (items: Item[], tagFilters: Iterable<TagFilter>, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
+const filterByRegex = (haystack: string | undefined, patterns: Iterable<RegExp>): boolean => Array.from(patterns)
+            .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && pattern.test(haystack)), true)
+
+const itemFilter = (items: Item[], tagFilters: Iterable<TagFilter>, searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
     .filter(item => 
         item.text !== undefined
         && item.text != ""
         && !(filterFlagged && item.text?.toLocaleLowerCase().includes("[flagged]"))
         && parentFilter !== undefined ? item.parent == parentFilter : true
     )
-    .filter(item => 
-        Array.from(tagFilters)
-            .reduce<boolean>((acc, filter) => acc && (item.text != undefined && item.text.includes(filter.name)), true)
-    )
+    .filter(item => filterByRegex(item.text, Array.from(tagFilters).map(tag => tag.pattern)))
+    .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
     .reverse()
 
-export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, itemFilter}
+export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, filterByRegex, itemFilter}
 

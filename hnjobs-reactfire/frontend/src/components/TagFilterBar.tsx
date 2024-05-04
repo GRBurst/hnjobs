@@ -12,7 +12,7 @@ interface TagProps {
 }
 
 function TagButton({ tagFilter, isActive, onActiveChange }: TagProps): ReactNode {
-    return isActive ? <Button type="primary" onClick={() => onActiveChange(tagFilter)}>{tagFilter.name}</Button> : <Button onClick={() => onActiveChange(tagFilter)}>{tagFilter.name}</Button>
+    return <Button type={isActive ? "primary" : "default"} onClick={() => onActiveChange(tagFilter)}>{tagFilter.name}</Button>
 }
 
 TagButton.defaultProps = {
@@ -28,15 +28,16 @@ interface TagFilterProps {
 }
 
 function TagFilterBar({allTags, activeTags, onActive, onInactive}: TagFilterProps) {
+    const tagSort = (t1: TagF, t2: TagF) => t1.name < t2.name ? -1 : 1
     
-    return <div style={{border: "1px solid blue"}}>
+    return <div className="filter-bar">
         <p>Active Filter</p>
-        <Flex gap="middle">
-            { [activeTags.pipe(HSet.map(tag => <TagButton key={tag.name} tagFilter={tag} isActive={true} onActiveChange={onInactive} />), HSet.values)] }
+        <Flex wrap="wrap" gap="small" className="filter-list">
+            {Array.from(activeTags).sort(tagSort).map(tag => <TagButton key={tag.name} tagFilter={tag} isActive={true} onActiveChange={onInactive} />)}
         </Flex>
         <p>Inactive Filter</p>
-        <Flex gap="middle">
-            { [HSet.difference(allTags, activeTags).pipe(HSet.map(tag => <TagButton key={tag.name} tagFilter={tag} isActive={false} onActiveChange={onActive} />), HSet.values)] }
+        <Flex wrap="wrap" gap="small" className="filter-list">
+            { Array.from(HSet.difference(allTags, activeTags)).sort(tagSort).map(tag => <TagButton key={tag.name} tagFilter={tag} isActive={false} onActiveChange={onActive} />) }
         </Flex>
         </div>
 }

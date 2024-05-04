@@ -1,27 +1,23 @@
-import { pipe, Effect } from "effect"
-
-import { HashSet } from "effect"
-
-import './HnJobs.css';
-import { FilterableLocalList, FilterableOnlineMultiList } from "./components/FilterableJobList"
-import { getKidItemsFromIds } from "./utils/hn";
-import { Item } from "./models/Item"
-import { TagFilter } from "./models/TagFilter"
-
+import { pipe, Effect, HashSet } from "effect"
 
 import { DatabaseProvider, useFirebaseApp  } from 'reactfire';
 import { getDatabase, DatabaseReference } from "firebase/database";
+
+import { FilterableLocalList, FilterableOnlineMultiList } from "./components/FilterableJobList"
+import { getKidItemsFromIds } from "./utils/hn";
+import { Item } from "./models/Item"
+import { technologies, locations } from "./utils/predefined";
+
+
 
 interface YcJobsListProps {
     local: boolean
 }
 const YcJobsList = ({local}: YcJobsListProps) => {
-    const allFilterTags = HashSet.fromIterable([
-        TagFilter({name: "Remote", pattern: RegExp("Remote", "gi")}),
-        TagFilter({name: "Scala", pattern: RegExp("Scala", "g")}),
-        TagFilter({name: "Haskell", pattern: RegExp("Haskell", "gi")}),
-        TagFilter({name: "Kubernetes", pattern: RegExp("Kubernetes", "gi")}),
-    ])
+    const predefinedFilterTags = HashSet.union(
+        technologies,
+        locations
+    )
 
     //ids:
     // - 39894820 (april)
@@ -55,11 +51,11 @@ const YcJobsList = ({local}: YcJobsListProps) => {
     //         Effect.tap(itemKids => console.log("combined kids", itemKids)),
     //     )
     
-    return local ? <FilterableLocalList filterTags={allFilterTags} /> : (<FilterableOnlineMultiList
+    return local ? <FilterableLocalList filterTags={predefinedFilterTags} /> : (<FilterableOnlineMultiList
             refEndpoint="/v0/askstories"
             queryConstraints={[]} // startAt(50), endAt(100)
             receiveProgram={askJobsProgram}
-            filterTags={allFilterTags}
+            filterTags={predefinedFilterTags}
             writeToFile={true}
         />)
 }

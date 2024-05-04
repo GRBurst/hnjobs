@@ -8,5 +8,6 @@ export interface TagFilter {
 }
 
 export const TagFilter = Data.case<TagFilter>()
+export const TagFilterSimple = (tagName: string) => TagFilter({name: tagName, pattern: RegExp(tagName, "gi")})
 
 export type TagFilters = HashSet<TagFilter>
