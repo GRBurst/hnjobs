@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { Button, Input, Space } from "antd"
 import type { SearchProps } from "antd/es/input/Search"
 
-import { TagFilter } from "../models/TagFilter"
+import { TagFilter, TagFilterSimple } from "../models/TagFilter"
+import { replaceTagCaptureGroup } from '../utils/hn'
 
 interface CustomTagFilterProps {
     onTagAdd: (key: string, tag: TagFilter) => void
@@ -14,8 +15,9 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
     const [tagPatternFlags, setTagPatternFlags] = useState<string>("")
 
     const addNewTag = () => {
-        if(tagName !== undefined && tagName != "" && tagPattern !== undefined && tagPattern != "") {
-            onTagAdd("custom", TagFilter({name: tagName, pattern: RegExp(tagPattern, tagPatternFlags)}))
+        if(tagName !== undefined && tagName != "") {
+            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({name: tagName, pattern: RegExp(tagPattern, tagPatternFlags)}) : TagFilterSimple(tagName)
+            onTagAdd("Custom", replaceTagCaptureGroup(newTag))
             setTagName("")
             setTagPattern("")
         }
@@ -31,7 +33,7 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
                 onChange={(e) => setTagName(e.target.value)}
             />
             <Input
-                placeholder="RegEx Search Term"
+                placeholder="Optional RegEx Search Term"
                 style={{ width: "55%" }}
                 allowClear
                 value={tagPattern}

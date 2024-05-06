@@ -14,7 +14,7 @@ export const technologies = HashSet.fromIterable([
     TagFilterSimple("Ruby on Rails"),
     TagFilterSimple("iOS"),
     TagFilterSimple("Android"),
-    TagFilter({name: "C++", pattern: RegExp(/C\+\+(\s|\b)/, "gi")}), // TODO: fix
+    TagFilter({name: "C++", pattern: RegExp(/(?:^|\b|\s)(?:C\+\+)(?:$|\W|\s)/, "gmi")}),
     TagFilterSimple("React Native"),
     TagFilterSimple("Rust"),
     TagFilterSimple("Angular"),
@@ -23,11 +23,11 @@ export const technologies = HashSet.fromIterable([
     TagFilterSimple(".NET"),
     TagFilterSimple("C#"),
     TagFilterSimple("Kotlin"),
-    TagFilter({name: "Scala", pattern: RegExp("scala(\\s|\\b)", "gi")}), // Prevent e.g. Scalable to match
+    TagFilter({name: "Scala", pattern: RegExp(/(?:^|\b|\s)(?:Scala[0-9]{0,1})(?:$|\b|\s)/, "gmi")}),
     TagFilterSimple("Kafka"),
     TagFilterSimple("Swift"),
     TagFilterSimple("Elixir"),
-    TagFilter({name: "C", pattern: RegExp("C(\\s|\\b)", "g")}),
+    TagFilter({name: "C", pattern: RegExp(/(?:^|\b|\s)(?:C)(?:$|\b|\s|^\+|^#)/, "gm")}),
     TagFilterSimple("Next.js"),
     TagFilterSimple("Clojure"),
     TagFilterSimple("Tensorflow"),

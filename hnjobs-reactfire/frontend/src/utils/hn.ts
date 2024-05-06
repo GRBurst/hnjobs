@@ -29,8 +29,15 @@ const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => 
         kidsArray.map(itemKids => getItemsFromIds(dbRef, itemKids, x => x))
     )
 
-const filterByRegex = (haystack: string | undefined, patterns: Iterable<RegExp>): boolean => Array.from(patterns)
-            .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && pattern.test(haystack)), true)
+const filterByRegexAny = (haystack: string | undefined, patterns: RegExp[]): boolean =>
+    patterns
+        .reduce<boolean>((acc, pattern) => acc || (haystack !== undefined && haystack.search(pattern) > -1), false)
+
+const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolean => 
+    patterns
+        .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
+
+const replaceTagCaptureGroup = (tag: TagFilter) => TagFilter({name: tag.name, pattern: RegExp(tag.pattern.source.replace(/(\()([^(:?)].*\))/, "(:?$2"), tag.pattern.flags)})
 
 const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
     .filter(item => 
@@ -45,5 +52,5 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
 
 const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
 
-export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, flatFilters, filterByRegex, itemFilter}
+export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, flatFilters, filterByRegex, filterByRegexAny, itemFilter, replaceTagCaptureGroup}
 

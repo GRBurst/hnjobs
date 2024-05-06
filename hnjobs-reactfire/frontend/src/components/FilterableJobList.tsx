@@ -13,18 +13,25 @@ import { CustomFilters } from './CustomFilters'
 import { Item, AskHn } from "../models/Item"
 import { TagFilters, TagFilter } from "../models/TagFilter"
 import { getComments, writeComments } from '../utils/persistence'
-import { flatFilters, filterByRegex, getItemsFromQueryIds, itemFilter } from '../utils/hn'
+import { flatFilters, filterByRegexAny, getItemsFromQueryIds, itemFilter } from '../utils/hn'
 
-const getHighlightedText = (text: string | undefined, highlights: RegExp[]) => {
+const getHighlightedText = (text: string | undefined, highlights: TagFilter[]) => {
     if (highlights === undefined || highlights.length == 0 || text === undefined) {
         return text ?? ""
     }
 
-    const parts = text.split(" ")
+    // Sort desc by length so that React Native will be highlighted if e.g. React and React Native are selected
+    const sorted = highlights.sort((r1, r2) => r1.name.length < r2.name.length ? 1 : -1)
+    const patterns = sorted.map(p => p.pattern.source).join("|")
+    const parts = text.split(RegExp(`(${patterns})`, "gim"))
 
-    const highlightedText = parts?.map((textWord, i) => 
-        filterByRegex(textWord, highlights) ? `<mark key=${i} className="search-terms-highlight">${textWord}</mark>` : textWord
-    ).join(" ")
+    console.log(patterns)
+    console.log(parts)
+
+    // Not very efficient but good enough for now
+    const highlightedText = parts
+        .map((textWord) => filterByRegexAny(textWord, sorted.map(f => f.pattern)) ? `<mark className="search-terms-highlight">${textWord}</mark>` : textWord)
+        .join("")
 
     return highlightedText
 }
@@ -40,9 +47,9 @@ const ItemList = ({
 }: ItemListProps) => <List
         className="job-list"
         itemLayout="horizontal"
-        dataSource={items ? itemFilter(items, tagFilters, searchFilter, parentFilter) : []}
+        dataSource={items ?? []}
         renderItem={(item) => {
-            const highlightedText = getHighlightedText(sanitizeHtml(item.text ?? ""), searchFilter !== undefined ? [...tagFilters.map(f => f.pattern), RegExp(searchFilter)] : tagFilters.map(f => f.pattern))
+            const highlightedText = getHighlightedText(sanitizeHtml(item.text ?? ""), searchFilter !== undefined ? [...tagFilters, TagFilter({name: "_Search_", pattern: RegExp(searchFilter)})] : tagFilters)
             return (
                 <List.Item key={item.id} className="job-list-item">
                     <div>
@@ -133,7 +140,7 @@ const FilterableList = ({
                 onInactive={(key: string, tag: TagFilter) => removeFilters(key , tag, activeTagFilters, setActiveTagFilters)}
                 />
             <ItemList 
-                items={itemFilter(items[0] ?? [], flatFilters(activeTagFilters), searchFilter)}
+                items={itemFilter(items[0] ?? [], flatFilters(activeTagFilters), searchFilter, parentItem)}
                 tagFilters={flatFilters(activeTagFilters)}
                 searchFilter={searchFilter}
                 parentFilter={parentItem}
