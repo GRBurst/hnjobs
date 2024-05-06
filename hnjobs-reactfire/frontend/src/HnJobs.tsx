@@ -1,4 +1,5 @@
-import { pipe, Effect, HashSet } from "effect"
+import { pipe, Effect } from "effect"
+import type { HashSet } from "effect/HashSet"
 
 import { DatabaseProvider, useFirebaseApp  } from 'reactfire';
 import { getDatabase, DatabaseReference } from "firebase/database";
@@ -6,6 +7,7 @@ import { getDatabase, DatabaseReference } from "firebase/database";
 import { FilterableLocalList, FilterableOnlineMultiList } from "./components/FilterableJobList"
 import { getKidItemsFromIds } from "./utils/hn";
 import { Item } from "./models/Item"
+import { TagFilter } from "./models/TagFilter"
 import { technologies, locations } from "./utils/predefined";
 
 
@@ -14,10 +16,10 @@ interface YcJobsListProps {
     local: boolean
 }
 const YcJobsList = ({local}: YcJobsListProps) => {
-    const predefinedFilterTags = HashSet.union(
-        technologies,
-        locations
-    )
+    const predefinedFilterTags = new Map<string,HashSet<TagFilter>>();
+    predefinedFilterTags.set("Technologies", technologies)
+    predefinedFilterTags.set("Locations", locations)
+
 
     //ids:
     // - 39894820 (april)

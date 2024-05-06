@@ -4,7 +4,7 @@ import { pipe, Effect } from "effect"
 import { get, child, DatabaseReference, DataSnapshot } from "firebase/database";
 
 import { Item } from "../models/Item"
-import { TagFilter } from "../models/TagFilter"
+import { TagFilter, TagFilters } from "../models/TagFilter"
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
@@ -32,16 +32,18 @@ const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => 
 const filterByRegex = (haystack: string | undefined, patterns: Iterable<RegExp>): boolean => Array.from(patterns)
             .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && pattern.test(haystack)), true)
 
-const itemFilter = (items: Item[], tagFilters: Iterable<TagFilter>, searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
+const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => items
     .filter(item => 
         item.text !== undefined
         && item.text != ""
         && !(filterFlagged && item.text?.toLocaleLowerCase().includes("[flagged]"))
         && parentFilter !== undefined ? item.parent == parentFilter : true
     )
-    .filter(item => filterByRegex(item.text, Array.from(tagFilters).map(tag => tag.pattern)))
+    .filter(item => filterByRegex(item.text, tagFilters.map(tag => tag.pattern)))
     .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
     .reverse()
 
-export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, filterByRegex, itemFilter}
+const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
+
+export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, flatFilters, filterByRegex, itemFilter}
 

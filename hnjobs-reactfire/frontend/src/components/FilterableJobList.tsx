@@ -13,7 +13,7 @@ import { CustomFilters } from './CustomFilters'
 import { Item, AskHn } from "../models/Item"
 import { TagFilters, TagFilter } from "../models/TagFilter"
 import { getComments, writeComments } from '../utils/persistence'
-import { filterByRegex, getItemsFromQueryIds, itemFilter } from '../utils/hn'
+import { flatFilters, filterByRegex, getItemsFromQueryIds, itemFilter } from '../utils/hn'
 
 const getHighlightedText = (text: string | undefined, highlights: RegExp[]) => {
     if (highlights === undefined || highlights.length == 0 || text === undefined) {
@@ -58,33 +58,83 @@ const ItemList = ({
 interface FilterableListProps {
     items: Item[][]
     parentItem: number | undefined
-    filterTags: TagFilters
+    filterTags: Map<string,TagFilters>
 }
 const FilterableList = ({
     parentItem,
     items,
     filterTags
 }: FilterableListProps) => {
-    const [allTagFilters, setAllTagFilters] = useState<TagFilters>(filterTags)
-    const [activeTagFilters, setActiveTagFilters] = useState<TagFilters>(HashSet.empty())
+    const [allTagFilters, setAllTagFilters] = useState<Map<string,TagFilters>>(filterTags)
+    const [activeTagFilters, setActiveTagFilters] = useState<Map<string,TagFilters>>(new Map())
     const [searchFilter, setSearchFilter] = useState<string | undefined>(undefined)
 
+    const updateFilters = (
+        key: string,
+        tag: TagFilter,
+        allFilters: Map<string,TagFilters>,
+        update: (filters: TagFilters, tag: TagFilter) => TagFilters,
+        stateUpdate: (filters: Map<string,TagFilters>) => void
+    ): void => {
+        const oldFilters: TagFilters = allFilters.get(key) ?? HashSet.empty()
+        const newFilters: TagFilters = update(oldFilters, tag) // HashSet.fromIterable([...oldFilters, tag])
+        allFilters.set(key, newFilters)
+        stateUpdate(new Map([...allFilters]))
+    }
+
+    const addFilters = (
+        key: string,
+        tag: TagFilter,
+        allFilters: Map<string,TagFilters>,
+        stateUpdate: (filters: Map<string,TagFilters>) => void
+    ) => {
+        updateFilters(
+            key,
+            tag,
+            allFilters,
+            (filters: TagFilters, tag: TagFilter) => HashSet.fromIterable([...filters, tag]),
+            stateUpdate
+        )
+    }
+    const removeFilters = (
+        key: string,
+        tag: TagFilter,
+        allFilters: Map<string,TagFilters>,
+        stateUpdate: (filters: Map<string,TagFilters>) => void
+    ) => {
+        updateFilters(
+            key,
+            tag,
+            allFilters,
+            (filters: TagFilters, tag: TagFilter) => HashSet.filter(filters, item => item !== tag),
+            stateUpdate
+        )
+    }
+
+    const filterDiff = (
+        allFilters: Map<string, TagFilters>,
+        activeFilters: Map<string, TagFilters>
+    ): Map<string, TagFilters> => {
+        const diffMap = new Map<string, TagFilters>()
+        allFilters.forEach((filters, key) => diffMap.set(key, HashSet.intersection(filters, activeFilters.get(key) ?? HashSet.empty())))
+        return diffMap
+    }
 
     return (
         <>
             <CustomFilters
-                onTagAdd={(tag: TagFilter) => setAllTagFilters(HashSet.fromIterable([...allTagFilters, tag]))}
+                onTagAdd={(key: string, tag: TagFilter) => addFilters(key , tag, allTagFilters, setAllTagFilters)}
                 onSearch={(needle: string | undefined) => setSearchFilter(needle)}
             />
             <TagFilterBar 
                 allTags={allTagFilters}
-                activeTags={HashSet.intersection(allTagFilters, activeTagFilters)}
-                onActive={(tag: TagFilter) => setActiveTagFilters(HashSet.fromIterable([...activeTagFilters, tag]))}
-                onInactive={(tag: TagFilter) => setActiveTagFilters(HashSet.filter(activeTagFilters, item => item !== tag))}
+                activeTags={filterDiff(allTagFilters, activeTagFilters)}
+                onActive={(key: string, tag: TagFilter) => addFilters(key , tag, activeTagFilters, setActiveTagFilters)}
+                onInactive={(key: string, tag: TagFilter) => removeFilters(key , tag, activeTagFilters, setActiveTagFilters)}
                 />
             <ItemList 
-                items={itemFilter(items[0] ?? [], activeTagFilters, searchFilter)}
-                tagFilters={Array.from(activeTagFilters)}
+                items={itemFilter(items[0] ?? [], flatFilters(activeTagFilters), searchFilter)}
+                tagFilters={flatFilters(activeTagFilters)}
                 searchFilter={searchFilter}
                 parentFilter={parentItem}
             />
@@ -94,7 +144,7 @@ const FilterableList = ({
 
                     
 interface FilterableLocalListProps {
-    filterTags: TagFilters
+    filterTags: Map<string,TagFilters>
 }
 const FilterableLocalList = ({
     filterTags
@@ -121,7 +171,7 @@ interface FilterableOnlineMultiListProps {
     refEndpoint: string,
     queryConstraints: QueryConstraint[],
     receiveProgram: (dbRef: DatabaseReference, items: Effect.Effect<Item[], Error>) => Effect.Effect<Item[][], Error>,
-    filterTags: TagFilters,
+    filterTags: Map<string,TagFilters>,
     writeToFile: boolean
 }
 const FilterableOnlineMultiList = ({

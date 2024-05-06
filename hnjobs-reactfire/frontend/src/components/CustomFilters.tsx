@@ -6,7 +6,7 @@ import type { SearchProps } from "antd/es/input/Search"
 import { TagFilter } from "../models/TagFilter"
 
 interface CustomTagFilterProps {
-    onTagAdd: (tag: TagFilter) => void
+    onTagAdd: (key: string, tag: TagFilter) => void
 }
 const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => { 
     const [tagName, setTagName] = useState<string>("")
@@ -15,7 +15,7 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
 
     const addNewTag = () => {
         if(tagName !== undefined && tagName != "" && tagPattern !== undefined && tagPattern != "") {
-            onTagAdd(TagFilter({name: tagName, pattern: RegExp(tagPattern, tagPatternFlags)}))
+            onTagAdd("custom", TagFilter({name: tagName, pattern: RegExp(tagPattern, tagPatternFlags)}))
             setTagName("")
             setTagPattern("")
         }
@@ -75,7 +75,7 @@ const SearchFilter = ({onTextSearch}: SearchFilterProps) => {
 }
 
 interface CustomFiltersProps {
-    onTagAdd: (tag: TagFilter) => void
+    onTagAdd: (key: string, tag: TagFilter) => void
     onSearch: (needle: string | undefined) => void
 }
 const CustomFilters = ({onTagAdd, onSearch}: CustomFiltersProps) => {
