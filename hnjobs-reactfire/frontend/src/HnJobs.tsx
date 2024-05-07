@@ -55,7 +55,7 @@ const YcJobsList = ({local}: YcJobsListProps) => {
     
     return local ? <FilterableLocalList filterTags={predefinedFilterTags} /> : (<FilterableOnlineMultiList
             refEndpoint="/v0/askstories"
-            queryConstraints={[]} // startAt(50), endAt(100)
+            queryConstraints={[]} // e.g. startAt(50), endAt(100)
             receiveProgram={askJobsProgram}
             filterTags={predefinedFilterTags}
             writeToFile={true}

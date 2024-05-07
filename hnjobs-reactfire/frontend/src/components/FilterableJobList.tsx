@@ -9,7 +9,6 @@ import { useDatabase, useDatabaseList  } from 'reactfire'
 import { QueryConstraint, query, ref, DatabaseReference } from "firebase/database"
 
 import { TagFilterBar } from "./TagFilterBar"
-import { CustomFilters } from './CustomFilters'
 import { Item, AskHn } from "../models/Item"
 import { TagFilters, TagFilter } from "../models/TagFilter"
 import { getComments, writeComments } from '../utils/persistence'
@@ -40,10 +39,9 @@ interface ItemListProps {
     items : Item[]
     tagFilters: TagFilter[]
     searchFilter: string | undefined
-    parentFilter: number | undefined
 }
 const ItemList = ({
-    items, tagFilters, searchFilter, parentFilter
+    items, tagFilters, searchFilter
 }: ItemListProps) => <List
         className="job-list"
         itemLayout="horizontal"
@@ -84,7 +82,7 @@ const FilterableList = ({
         stateUpdate: (filters: Map<string,TagFilters>) => void
     ): void => {
         const oldFilters: TagFilters = allFilters.get(key) ?? HashSet.empty()
-        const newFilters: TagFilters = update(oldFilters, tag) // HashSet.fromIterable([...oldFilters, tag])
+        const newFilters: TagFilters = update(oldFilters, tag)
         allFilters.set(key, newFilters)
         stateUpdate(new Map([...allFilters]))
     }
@@ -129,21 +127,18 @@ const FilterableList = ({
 
     return (
         <>
-            <CustomFilters
-                onTagAdd={(key: string, tag: TagFilter) => addFilters(key , tag, allTagFilters, setAllTagFilters)}
-                onSearch={(needle: string | undefined) => setSearchFilter(needle)}
-            />
             <TagFilterBar 
                 allTags={allTagFilters}
                 activeTags={filterDiff(allTagFilters, activeTagFilters)}
                 onActive={(key: string, tag: TagFilter) => addFilters(key , tag, activeTagFilters, setActiveTagFilters)}
                 onInactive={(key: string, tag: TagFilter) => removeFilters(key , tag, activeTagFilters, setActiveTagFilters)}
-                />
+                onTagAdd={(key: string, tag: TagFilter) => addFilters(key , tag, allTagFilters, setAllTagFilters)}
+                onSearch={(needle: string | undefined) => setSearchFilter(needle)}
+            />
             <ItemList 
                 items={itemFilter(items[0] ?? [], flatFilters(activeTagFilters), searchFilter, parentItem)}
                 tagFilters={flatFilters(activeTagFilters)}
                 searchFilter={searchFilter}
-                parentFilter={parentItem}
             />
         </>
     )

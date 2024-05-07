@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Button, Input, Space } from "antd"
+import { Button, Flex, Input, Space } from "antd"
 import type { SearchProps } from "antd/es/input/Search"
 
 import { TagFilter, TagFilterSimple } from "../models/TagFilter"
@@ -22,6 +22,7 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
             setTagPattern("")
         }
     }
+
     return (
         <Space.Compact>
             <Input
@@ -83,10 +84,10 @@ interface CustomFiltersProps {
 const CustomFilters = ({onTagAdd, onSearch}: CustomFiltersProps) => {
 
     return (
-        <>
+        <Flex gap="middle" vertical>
             <CustomTagFilter onTagAdd={onTagAdd} />
             <SearchFilter onTextSearch={onSearch} />
-        </>
+        </Flex>
     )
 }
 

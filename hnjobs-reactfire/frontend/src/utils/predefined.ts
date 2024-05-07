@@ -43,7 +43,9 @@ export const technologies = HashSet.fromIterable([
     TagFilterSimple("Clickhouse"),
     TagFilterSimple("Ocaml"),
     TagFilterSimple("Svelte"),
-    TagFilterSimple("Lua")
+    TagFilterSimple("Lua"),
+    TagFilterSimple("AWS"),
+    TagFilterSimple("Firebase"),
 ])
 
 export const locations = HashSet.fromIterable([
