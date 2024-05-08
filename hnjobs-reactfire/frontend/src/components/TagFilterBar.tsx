@@ -33,7 +33,12 @@ interface TagFilterProps {
 }
 
 function TagFilterBar({allTags, activeTags, onActive, onInactive, onTagAdd, onSearch}: TagFilterProps) {
-    const tagSort = (t1: TagF, t2: TagF) => t1.name < t2.name ? -1 : 1
+    const tagSort = (t1: TagF, t2: TagF): number => {
+        if(t1.name == "Remote") return -1
+        if(t2.name == "Remote") return 1
+
+        return (t1.name < t2.name) ? -1 : 1
+    }
     
     const filterNonEmpty = Array.from(activeTags.keys()).reduce((acc, key) => acc || Array.from(activeTags.get(key) ?? []).length > 0, false)
     const panelStyle: CSSProperties = { border: 'none' };

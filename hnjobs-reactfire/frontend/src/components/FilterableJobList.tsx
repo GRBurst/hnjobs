@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { List } from "antd";
-import { Effect } from "effect"
+import { pipe, Effect } from "effect"
 import { HashSet } from "effect"
 import sanitizeHtml from "sanitize-html"
 
@@ -13,6 +13,8 @@ import { Item, AskHn } from "../models/Item"
 import { TagFilters, TagFilter } from "../models/TagFilter"
 import { getComments, writeComments } from '../utils/persistence'
 import { flatFilters, filterByRegexAny, getItemsFromQueryIds, itemFilter } from '../utils/hn'
+
+import comments from '../../../comments.json';
 
 const getHighlightedText = (text: string | undefined, highlights: TagFilter[]) => {
     if (highlights === undefined || highlights.length == 0 || text === undefined) {
@@ -155,10 +157,13 @@ const FilterableLocalList = ({
     const [parentItem, setParentItem] = useState<number | undefined>(undefined)
 
     useMemo(() => {
-        Effect.runPromise(getComments()).then((received: AskHn[]) => {
-            setParentItem(received[0].id)
-            setAllItems([received[0].comments])
-        })
+        const current: AskHn[] = comments.threads
+        setParentItem(() => current[0].id)
+        setAllItems(() => [current[0].comments])
+        // Effect.runPromise(getComments()).then((received: AskHn[]) => {
+        //     setParentItem(received[0].id)
+        //     setAllItems([received[0].comments])
+        // })
     }, [])
 
     return (

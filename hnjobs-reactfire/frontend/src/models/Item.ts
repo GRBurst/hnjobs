@@ -1,28 +1,31 @@
 export interface Item {
-  by: string,
-  descendants: number,
   id: number,
-  kids?: number[],
-  score: number,
-  time: number,
-  title?: string,
-  text?: string,
+  deleted?: boolean,
   type?: string,
+  by?: string,
+  time: number,
+  text?: string,
+  dead?: boolean,
   parent?: number,
-  url: string
+  poll?: string,
+  kids?: number[],
+  url?: string
+  score?: number,
+  title?: string,
+  parts?: string,
+  descendants?: number,
+}
+
+export interface User {
+  id: number,
+  created: number,
+  karma: number,
+  about?: string,
+  submitted?: number[],
+  delay?: number,
 }
 
 export interface AskHn {
-  by: string,
-  descendants: number,
   id: number,
-  kids?: number[],
-  score: number,
-  time: number,
-  title?: string,
-  text?: string,
-  type?: string,
-  parent?: number,
-  url: string
   comments: Item[]
 }

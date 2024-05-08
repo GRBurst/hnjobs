@@ -43,8 +43,9 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
     .filter(item => 
         item.text !== undefined
         && item.text != ""
-        && !(filterFlagged && item.text?.toLocaleLowerCase().includes("[flagged]"))
-        && parentFilter !== undefined ? item.parent == parentFilter : true
+        && !(filterFlagged && item.text?.toLowerCase().includes("[flagged]"))
+        && !(filterFlagged && item.text?.toLowerCase().includes("[dead]"))
+        && (parentFilter !== undefined ? item.parent == parentFilter : true)
     )
     .filter(item => filterByRegex(item.text, tagFilters.map(tag => tag.pattern)))
     .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
