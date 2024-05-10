@@ -1,7 +1,34 @@
-# React Playground
+# HnJobs
 
-Trying out different things.
+## Technologies + Frameworks
 
-Root contains a nix flake, containing `devbox` if you just want to get started without installing anything in your system.
+- React TypeScript Frontend
+- Vite hot reloading and serving
+- devbox for a reproducible dev environment
+- direnv to automatically load dev environment when entering project directory
 
-Run `nix develop` to make it available and play around in the different playgrounds ;-)
+## Setup
+
+Install `devbox` and `direnv`.
+Allow `direnv` to automatically run the `.envrc`.
+
+```bash
+direnv allow
+```
+
+When `direnv` finished setting up the environment using devbox, simply run `yarn` from the `frondend` folder to install all dependencies:
+```bash
+yarn install
+```
+
+## Run
+
+### With Devbox
+Just run `devbox services up` from your terminal.
+
+### Without Devbox
+
+For the frontend, `cd` to `frontend` folder and run `yarn dev` or run `yarn` as follows:
+```bash
+yarn --cwd ./frontend dev
+```

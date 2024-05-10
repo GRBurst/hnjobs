@@ -46,6 +46,8 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     git
 
+    jq yq-go
+
     black
     isort
     ruff
