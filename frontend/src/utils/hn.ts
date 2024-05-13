@@ -1,12 +1,12 @@
-// @ts-ignore
-import { QueryChange } from "rxfire/database"
+// @ts-expect-error: QueryChange is not exported correctly from rxfire/database
+import { QueryChange } from "rxfire/database";
 
-import { pipe, Effect } from "effect"
+import { Effect, pipe } from "effect";
 
-import { get, child, DatabaseReference, DataSnapshot } from "firebase/database";
+import { DataSnapshot, DatabaseReference, child, get } from "firebase/database";
 
-import { Item } from "../models/Item"
-import { TagFilter, TagFilters } from "../models/TagFilter"
+import { Item } from "../models/Item";
+import { TagFilter, TagFilters } from "../models/TagFilter";
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
@@ -23,6 +23,7 @@ const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<
 
 const getItemsFromIds = <T,>(dbRef: DatabaseReference, itemIdsHolder: Iterable<T>, itemIdExtractor: (itemIdHolder: T) => number): Effect.Effect<Item[], Error> => Effect.forEach(itemIdsHolder, (idHolder: T) => getItemFromId(dbRef, itemIdExtractor(idHolder)));
 
+const getItemsFromQueryId = (dbRef: DatabaseReference, queryItem: QueryChange): Effect.Effect<Item, Error> => getItemFromId(dbRef, queryItem.snapshot.val())
 const getItemsFromQueryIds = (dbRef: DatabaseReference, itemIds: QueryChange[]): Effect.Effect<Item[], Error> => {
     return getItemsFromIds(dbRef, itemIds, idHolder => idHolder.snapshot.val())
 }
@@ -55,5 +56,5 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
 
 const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
 
-export {getItemFromId, getItemsFromIds, getItemsFromQueryIds, getKidItemsFromIds, flatFilters, filterByRegex, filterByRegexAny, itemFilter, replaceTagCaptureGroup}
+export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemFilter, replaceTagCaptureGroup };
 

@@ -1,78 +1,142 @@
-import { pipe, Effect } from "effect"
-import type { HashSet } from "effect/HashSet"
+import { Effect, pipe } from "effect";
+import type { HashSet } from "effect/HashSet";
+import { TagFilter, TagFilters } from "./models/TagFilter";
 
-import { DatabaseProvider, useFirebaseApp  } from 'reactfire';
-import { getDatabase, DatabaseReference } from "firebase/database";
+import { DatabaseReference, getDatabase, ref } from "firebase/database";
+import {
+  DatabaseProvider,
+  useDatabase,
+  useDatabaseObjectData,
+  useFirebaseApp,
+} from "reactfire";
 
-import { FilterableLocalList, FilterableOnlineMultiList } from "./components/FilterableJobList"
-import { getKidItemsFromIds } from "./utils/hn";
-import { Item } from "./models/Item"
-import { TagFilter } from "./models/TagFilter"
-import { technologies, locations } from "./utils/predefined";
+import { useCallback, useMemo, useState } from "react";
+import comments from "../assets/comments.json";
+import { FilterableJobList } from "./components/FilterableJobList";
+import { AskHn, Item, User } from "./models/Item";
+import { getItemsFromIds } from "./utils/hn";
+import { writeComments } from "./utils/persistence";
+import { locations, technologies } from "./utils/predefined";
 
-
-
-interface YcJobsListProps {
-    local: boolean
+interface FilterableLocalListProps {
+  filterTags: Map<string, TagFilters>;
 }
-const YcJobsList = ({local}: YcJobsListProps) => {
-    const predefinedFilterTags = new Map<string,HashSet<TagFilter>>();
-    predefinedFilterTags.set("Technologies", technologies)
-    predefinedFilterTags.set("Locations", locations)
+const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
+  const [allItems, setAllItems] = useState<Item[][]>([[]]);
+  const [parentItem, setParentItem] = useState<number | undefined>(undefined);
+  console.log("Using local data from comments.json");
 
+  useMemo(() => {
+    const current: AskHn[] = comments.threads;
+    setParentItem(() => current[0].id);
+    setAllItems(() => [current[0].comments]);
+    // Effect.runPromise(getComments()).then((received: AskHn[]) => {
+    //     setParentItem(received[0].id)
+    //     setAllItems([received[0].comments])
+    // })
+  }, []);
 
-    //ids:
-    // - 39894820 (april)
-    // - 40224213 (may)
-    // hardcode if it is not in the firebase api anymore
-    // e.g. use getItemsFromIds(dbRef, [39894820], x => x),
-    const askJobsProgram = (dbRef: DatabaseReference, initAsks: Effect.Effect<Item[], Error>): Effect.Effect<Item[][], Error> => pipe(
-            initAsks,
-            Effect.tap((asks: Item[]) => console.log("effect asks", asks)),
-            Effect.map(asks => asks.filter((ask: Item) => ask.by == "whoishiring" && ask.title?.toLowerCase().includes("who is hiring"))),
-            Effect.tap(asks => console.log("filtered asks", asks)),
-            Effect.map(asks => asks.map((ask: Item) => ask.kids ?? [])),
-            Effect.tap(itemKids => console.log("mapped kids", itemKids)),
-            Effect.flatMap(itemKids => getKidItemsFromIds(dbRef, itemKids)),
-            Effect.tap(itemKids => console.log("combined kids", itemKids)),
-        )
-    // const askJobsProgram = (dbRef: DatabaseReference, initAsks: Effect.Effect<Item[], Error>): Effect.Effect<[Item, Item[]][], Error> => pipe(
-    //         initAsks,
-    //         Effect.tap((asks: Item[]) => console.log("effect asks", asks)),
-    //         Effect.map(asks => asks.filter((ask: Item) => ask.by == "whoishiring" && ask.title?.toLowerCase().includes("who is hiring"))),
-    //         Effect.tap(asks => console.log("filtered asks", asks)),
-    //         Effect.map(asks => asks.map((ask: Item) => makeTuple(ask, ask.kids ?? []))), //Effect<Item[]> => Effect<[Item, number[]][]>
-    //         Effect.tap(parentsWithKids => console.log("mapped kids", parentsWithKids)),
-    //         Effect.flatMap(parentsWithKids => Traversable.sequence(
-    //             // const res1: [Item, Effect.Effect<Item[], Error>][]  = parentsWithKids.map((parentWithKids: [Item, number[]]) => mapSecond(parentWithKids, (snd) => getItemsFromIds(dbRef, snd, x => x)))
-    //             // const res2: Effect.Effect<[Item, Item[]][]> = Traversable.sequence(res1)
-    //             // // Traversable.sequence(parentsWithKids, parentWithKids => mapSecond(parentWithKids, (snd) => getKidItemsFromIds(dbRef, snd)))
-    //             // return res2
-    //             parentsWithKids.map((parentWithKids: [Item, number[]]) => Traversable.sequence(mapSecond(parentWithKids, (snd) => getItemsFromIds(dbRef, snd, x => x))))
-    //         )),
-    //         Effect.tap(itemKids => console.log("combined kids", itemKids)),
-    //     )
-    
-    return local ? <FilterableLocalList filterTags={predefinedFilterTags} /> : (<FilterableOnlineMultiList
-            refEndpoint="/v0/askstories"
-            queryConstraints={[]} // e.g. startAt(50), endAt(100)
-            parentItem={40224213}
-            receiveProgram={askJobsProgram}
-            filterTags={predefinedFilterTags}
-            writeToFile={true}
-        />)
+  return (
+    <FilterableJobList
+      parentItem={parentItem}
+      items={allItems[0] ?? []}
+      filterTags={filterTags}
+    />
+  );
+};
+
+interface WhoIsHiringProps {
+  filterTags: Map<string, TagFilters>;
 }
+const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
+  const [allItems, setAllItems] = useState<Item[]>([]);
+  const whoishiring = "whoishiring";
+
+  const userRef = `v0/user/${whoishiring}`;
+
+  const db = useDatabase();
+  const dbRef = ref(useDatabase());
+  const endpointRef = ref(db, userRef);
+
+  const { status: endpointStatus, data: userData } =
+    useDatabaseObjectData<User>(endpointRef);
+
+  const threadProgram = useCallback(
+    (askDbRef: DatabaseReference, user: User) =>
+      pipe(
+        getItemsFromIds(
+          askDbRef,
+          user.submitted?.slice(0, 3) ?? [],
+          (n: number) => n
+        ),
+        Effect.tap(([whoIsHiring, freelancer, whoWantsHiring]) => {
+          console.log(whoIsHiring.title);
+          console.log(freelancer.title);
+          console.log(whoWantsHiring.title);
+        }),
+        Effect.map((asks) =>
+          asks
+            .filter((ask) =>
+              ask.title?.toLowerCase().includes("ask hn: who is hiring?")
+            )
+            .at(0)
+        ),
+        Effect.map((ask) => ask?.kids ?? []),
+        Effect.tap((askKids) => console.log("mapped kids", askKids)),
+        Effect.flatMap((itemKids) =>
+          getItemsFromIds(dbRef, itemKids, (x) => x)
+        ),
+        Effect.tap((itemKids) => console.log("final kids", itemKids))
+      ),
+    [dbRef]
+  );
+
+  const receivedUser = useMemo(
+    () => (endpointStatus == "success" ? userData : undefined),
+    [endpointStatus, userData]
+  );
+
+  useMemo(() => {
+    if (receivedUser) {
+      Effect.runPromise(threadProgram(dbRef, receivedUser)).then(
+        (receivedItems) => {
+          console.log("items: ", receivedItems);
+          setAllItems(receivedItems);
+          writeComments([receivedItems]);
+        }
+      );
+    }
+  }, [dbRef, threadProgram, receivedUser]);
+
+  return (
+    <FilterableJobList
+      parentItem={undefined}
+      items={allItems ?? []}
+      filterTags={filterTags}
+    />
+  );
+};
 
 function HnJobs() {
-    const app = useFirebaseApp();
-    const database = getDatabase(app);
+  const app = useFirebaseApp();
+  const database = getDatabase(app);
 
-    return (
-        <DatabaseProvider sdk={database}>
-            <h1>HackerNews Jobs 💥</h1>
-            <YcJobsList local={(import.meta.env.VITE_DATA_SOURCE == "online")}/>
-        </DatabaseProvider>
-    );
+  const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
+  predefinedFilterTags.set("Technologies", technologies);
+  predefinedFilterTags.set("Locations", locations);
+
+  return (
+    <>
+      <DatabaseProvider sdk={database}>
+        <h1>HackerNews Jobs 💥</h1>
+        {import.meta.env.VITE_DATA_SOURCE == "local" ? (
+          <FilterableLocalList filterTags={predefinedFilterTags} />
+        ) : (
+          <WhoIsHiring filterTags={predefinedFilterTags} />
+        )}
+      </DatabaseProvider>
+    </>
+  );
 }
 
-export default HnJobs
+export default HnJobs;
