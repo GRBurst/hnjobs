@@ -1,6 +1,6 @@
 import { Effect, pipe } from "effect";
 import type { HashSet } from "effect/HashSet";
-import { TagFilter, TagFilters } from "./models/TagFilter";
+import { TagFilter, TagFilters } from "../models/TagFilter";
 
 import { DatabaseReference, getDatabase, ref } from "firebase/database";
 import {
@@ -11,24 +11,26 @@ import {
 } from "reactfire";
 
 import { useCallback, useMemo, useState } from "react";
-import comments from "../assets/comments.json";
-import { FilterableJobList } from "./components/FilterableJobList";
-import { AskHn, Item, User } from "./models/Item";
-import { getItemsFromIds } from "./utils/hn";
-import { writeComments } from "./utils/persistence";
-import { locations, technologies } from "./utils/predefined";
+import comments from "../../assets/comments.json";
+import { AskHn, Item, User } from "../models/Item";
+import { getItemsFromIds } from "../utils/hn";
+import { writeComments } from "../utils/persistence";
+import { locations, technologies } from "../utils/predefined";
+import { FilterableJobList } from "./FilterableJobList";
 
 interface FilterableLocalListProps {
   filterTags: Map<string, TagFilters>;
 }
 const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
   const [allItems, setAllItems] = useState<Item[][]>([[]]);
-  const [parentItem, setParentItem] = useState<number | undefined>(undefined);
+  const [parentItemId, setParentItemId] = useState<number | undefined>(
+    undefined
+  );
   console.log("Using local data from comments.json");
 
   useMemo(() => {
     const current: AskHn[] = comments.threads;
-    setParentItem(() => current[0].id);
+    setParentItemId(() => current[0].id);
     setAllItems(() => [current[0].comments]);
     // Effect.runPromise(getComments()).then((received: AskHn[]) => {
     //     setParentItem(received[0].id)
@@ -38,7 +40,7 @@ const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
 
   return (
     <FilterableJobList
-      parentItem={parentItem}
+      parentItemId={parentItemId}
       items={allItems[0] ?? []}
       filterTags={filterTags}
     />
@@ -110,7 +112,7 @@ const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
 
   return (
     <FilterableJobList
-      parentItem={undefined}
+      parentItemId={receivedUser?.id}
       items={allItems ?? []}
       filterTags={filterTags}
     />

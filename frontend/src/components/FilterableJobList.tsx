@@ -81,11 +81,11 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
 
 interface FilterableJobListProps {
   items: Item[];
-  parentItem: number | undefined;
+  parentItemId: number | undefined;
   filterTags: Map<string, TagFilters>;
 }
 const FilterableJobList = ({
-  parentItem,
+  parentItemId,
   items,
   filterTags,
 }: FilterableJobListProps) => {
@@ -177,7 +177,7 @@ const FilterableJobList = ({
           items ?? [],
           flatFilters(activeTagFilters),
           searchFilter,
-          parentItem
+          parentItemId
         )}
         tagFilters={flatFilters(activeTagFilters)}
         searchFilter={searchFilter}
