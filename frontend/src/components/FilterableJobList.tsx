@@ -156,6 +156,16 @@ const FilterableJobList = ({
     return diffMap;
   };
 
+  console.log("ItemList: ", items);
+  const filteredItems = itemFilter(
+    items ?? [],
+    flatFilters(activeTagFilters),
+    searchFilter,
+    parentItemId
+  );
+
+  console.log("FilteredItemList: ", filteredItems);
+
   return (
     <>
       <TagFilterBar
@@ -173,12 +183,7 @@ const FilterableJobList = ({
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
       />
       <ItemList
-        items={itemFilter(
-          items ?? [],
-          flatFilters(activeTagFilters),
-          searchFilter,
-          parentItemId
-        )}
+        items={filteredItems}
         tagFilters={flatFilters(activeTagFilters)}
         searchFilter={searchFilter}
       />

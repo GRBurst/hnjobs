@@ -11,37 +11,63 @@ import {
 } from "reactfire";
 
 import { useCallback, useMemo, useState } from "react";
-import comments from "../../assets/comments.json";
-import { AskHn, Item, User } from "../models/Item";
+import { Item, User } from "../models/Item";
 import { getItemsFromIds } from "../utils/hn";
-import { writeComments } from "../utils/persistence";
+import { getDbKids, writeComments } from "../utils/persistence";
+
+import { RowArray } from "sqlite-wasm-http/sqlite3.js";
 import { locations, technologies } from "../utils/predefined";
 import { FilterableJobList } from "./FilterableJobList";
-
 interface FilterableLocalListProps {
   filterTags: Map<string, TagFilters>;
 }
 const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
-  const [allItems, setAllItems] = useState<Item[][]>([[]]);
+  const [allItems, setAllItems] = useState<Item[]>([]);
   const [parentItemId, setParentItemId] = useState<number | undefined>(
     undefined
   );
-  console.log("Using local data from comments.json");
+
+  // useMemo(() => {
+  //   console.log("Using local data from comments.json");
+  //   axios.get("http://localhost:5173/comments.json").then((response) => {
+  //     const current: AskHn[] = response.data.threads;
+  //     // setParentItemId(current[0].id);
+  //     setParentItemId(undefined);
+  //     setAllItems(current[0].comments);
+  //   });
+  // }, []);
 
   useMemo(() => {
-    const current: AskHn[] = comments.threads;
-    setParentItemId(() => current[0].id);
-    setAllItems(() => [current[0].comments]);
-    // Effect.runPromise(getComments()).then((received: AskHn[]) => {
-    //     setParentItem(received[0].id)
-    //     setAllItems([received[0].comments])
-    // })
+    getDbKids().then((dbKids: RowArray[]) => {
+      console.log("Using local data from hnjobs.db");
+      const items: Item[] = dbKids.map((kid) => {
+        const zipped = kid.columnNames.map((colName, colIdx) => [
+          colName,
+          kid.row[colIdx],
+        ]);
+        const item: Item = zipped.reduce(
+          (accObj, obj) => ({
+            ...accObj,
+            ...{
+              [obj[0] as string]: ["deleted", "dead"].includes(obj[0] as string)
+                ? obj[1] == 1
+                : obj[1],
+            },
+          }),
+          {}
+        ) as Item;
+        return item;
+      });
+      console.log(items);
+      setAllItems(items);
+      setParentItemId(undefined);
+    });
   }, []);
 
   return (
     <FilterableJobList
       parentItemId={parentItemId}
-      items={allItems[0] ?? []}
+      items={allItems ?? []}
       filterTags={filterTags}
     />
   );
