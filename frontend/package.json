@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
+    "@effect/schema": "^0.67.2",
     "antd": "^5.16.2",
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
     "effect": "^3.0.3",
     "firebase": "^10.11.1",
-    "openai": "^4.40.1",
     "postcss": "^8.4.38",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

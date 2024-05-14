@@ -1,21 +1,30 @@
 // @ts-expect-error: QueryChange is not exported correctly from rxfire/database
 import { QueryChange } from "rxfire/database";
 
-import { Effect, pipe } from "effect";
+import { Effect, Either, pipe } from "effect";
 
 import { DataSnapshot, DatabaseReference, child, get } from "firebase/database";
 
+import { Schema } from "@effect/schema";
+import { ParseError } from "@effect/schema/ParseResult";
 import { Item } from "../models/Item";
 import { TagFilter, TagFilters } from "../models/TagFilter";
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
-    console.log(`itemId: ${itemId}`)
-    const existsOption = (job: DataSnapshot) => job.exists() ? Effect.succeed(job.val()) : Effect.fail(new Error("No data"));
+    const decodeItem = Schema.decodeUnknownEither(Item);
+    const parseItem = (job: DataSnapshot) => {
+        const itemE: Either.Either<Item, ParseError> = decodeItem(job.val()) 
+        if(Either.isRight(itemE)) {
+            return Effect.succeed(itemE.right)
+        } else {
+            return Effect.fail(itemE.left)
+        }
+    }
 
     const result = pipe(
       Effect.tryPromise(() => get(child(dbRef, `v0/item/${itemId}`))),
-      Effect.flatMap(existsOption)
+      Effect.flatMap(snapshot => snapshot.exists() ? parseItem(snapshot) : Effect.fail(new Error("No data")))
     );
 
     return result;

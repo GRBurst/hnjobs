@@ -1,4 +1,4 @@
-import { Effect, pipe } from "effect";
+import { Effect, Either, pipe } from "effect";
 import type { HashSet } from "effect/HashSet";
 import { TagFilter, TagFilters } from "../models/TagFilter";
 
@@ -11,31 +11,54 @@ import {
 } from "reactfire";
 
 import { useCallback, useMemo, useState } from "react";
-import { Item, User } from "../models/Item";
+import { AskHn, Item, User } from "../models/Item";
 import { getItemsFromIds } from "../utils/hn";
 import { getDbKids, writeComments } from "../utils/persistence";
 
+import { Schema } from "@effect/schema";
+import { ParseError } from "@effect/schema/ParseResult";
+import axios from "axios";
 import { RowArray } from "sqlite-wasm-http/sqlite3.js";
 import { locations, technologies } from "../utils/predefined";
 import { FilterableJobList } from "./FilterableJobList";
+
 interface FilterableLocalListProps {
   filterTags: Map<string, TagFilters>;
 }
 const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
-  const [allItems, setAllItems] = useState<Item[]>([]);
+  const [allItems, setAllItems] = useState<readonly Item[]>([]);
   const [parentItemId, setParentItemId] = useState<number | undefined>(
     undefined
   );
 
-  // useMemo(() => {
-  //   console.log("Using local data from comments.json");
-  //   axios.get("http://localhost:5173/comments.json").then((response) => {
-  //     const current: AskHn[] = response.data.threads;
-  //     // setParentItemId(current[0].id);
-  //     setParentItemId(undefined);
-  //     setAllItems(current[0].comments);
-  //   });
-  // }, []);
+  useMemo(() => {
+    console.log("Using local data from comments.json");
+    axios.get("http://localhost:5173/comments.json").then((response) => {
+      const decodeHn = Schema.decodeUnknownEither(AskHn);
+      const current: Either.Either<AskHn, ParseError> = decodeHn(
+        response.data.threads[0]
+      );
+      if (Either.isRight(current)) {
+        setParentItemId(current.right.id);
+        setAllItems(current.right.comments);
+      }
+    });
+  }, []);
+
+  return (
+    <FilterableJobList
+      parentItemId={parentItemId}
+      items={[...allItems]}
+      filterTags={filterTags}
+    />
+  );
+};
+
+const FilterableSqliteList = ({ filterTags }: FilterableLocalListProps) => {
+  const [allItems, setAllItems] = useState<readonly Item[]>([]);
+  const [parentItemId, setParentItemId] = useState<number | undefined>(
+    undefined
+  );
 
   useMemo(() => {
     getDbKids().then((dbKids: RowArray[]) => {
@@ -67,7 +90,7 @@ const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
   return (
     <FilterableJobList
       parentItemId={parentItemId}
-      items={allItems ?? []}
+      items={[...allItems]}
       filterTags={filterTags}
     />
   );
@@ -153,15 +176,21 @@ function HnJobs() {
   predefinedFilterTags.set("Technologies", technologies);
   predefinedFilterTags.set("Locations", locations);
 
+  const getList = (source: string): JSX.Element => {
+    if (source == "local") {
+      return <FilterableLocalList filterTags={predefinedFilterTags} />;
+    } else if (source == "sqlite") {
+      return <FilterableSqliteList filterTags={predefinedFilterTags} />;
+    } else {
+      return <WhoIsHiring filterTags={predefinedFilterTags} />;
+    }
+  };
+
   return (
     <>
       <DatabaseProvider sdk={database}>
         <h1>HackerNews Jobs 💥</h1>
-        {import.meta.env.VITE_DATA_SOURCE == "local" ? (
-          <FilterableLocalList filterTags={predefinedFilterTags} />
-        ) : (
-          <WhoIsHiring filterTags={predefinedFilterTags} />
-        )}
+        {getList(import.meta.env.VITE_DATA_SOURCE)}
       </DatabaseProvider>
     </>
   );

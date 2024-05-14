@@ -1,31 +1,38 @@
-export interface Item {
-  id: number,
-  time: number,
-  deleted?: boolean,
-  type?: string,
-  by?: string,
-  text?: string,
-  dead?: boolean,
-  parent?: number,
-  poll?: string,
-  kids?: number[],
-  url?: string
-  score?: number,
-  title?: string,
-  parts?: string,
-  descendants?: number,
-}
+import { Schema } from "@effect/schema"
 
-export interface User {
-  id: number,
-  created: number,
-  karma: number,
-  about?: string,
-  submitted?: number[],
-  delay?: number,
-}
+export const Item = Schema.Struct({
+  id: Schema.Number,
+  time: Schema.Number,
+  deleted: Schema.optional(Schema.Boolean),
+  type: Schema.optional(Schema.String),
+  by: Schema.optional(Schema.String),
+  text: Schema.optional(Schema.String),
+  dead: Schema.optional(Schema.Boolean),
+  parent: Schema.optional(Schema.Number),
+  poll: Schema.optional(Schema.String),
+  kids: Schema.optional(Schema.Array(Schema.Number)),
+  url: Schema.optional(Schema.String),
+  score: Schema.optional(Schema.Number),
+  title: Schema.optional(Schema.String),
+  parts: Schema.optional(Schema.String),
+  descendants: Schema.optional(Schema.Number),
+})
+export type Item = typeof Item.Type
 
-export interface AskHn {
-  id: number,
-  comments: Item[]
-}
+
+export const User = Schema.Struct({
+  id: Schema.Number,
+  created: Schema.Number,
+  karma: Schema.Number,
+  about: Schema.optional(Schema.String),
+  submitted: Schema.optional(Schema.Array(Schema.Number)),
+  delay: Schema.optional(Schema.Number),
+})
+export type User = typeof User.Type
+
+
+export const AskHn = Schema.Struct({
+  id: Schema.Number,
+  comments: Schema.Array(Item),
+})
+export type AskHn = typeof AskHn.Type
