@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
-import { Button, Flex, Input, Space } from "antd"
-import type { SearchProps } from "antd/es/input/Search"
+import { Button, Flex, TextField, Box } from "@radix-ui/themes";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+// import type { SearchProps } from "antd/es/input/Search"
 
 import { TagFilter, TagFilterSimple } from "../models/TagFilter"
 import { replaceTagCaptureGroup } from '../utils/hn'
@@ -24,32 +25,27 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
     }
 
     return (
-        <Space.Compact>
-            <Input
+        <Box>
+            <TextField.Root
                 placeholder="Tag Name"
                 style={{ width: "20%" }}
-                allowClear
                 value={tagName}
-                onPressEnter={addNewTag}
                 onChange={(e) => setTagName(e.target.value)}
             />
-            <Input
+            <TextField.Root
                 placeholder="Optional RegEx Search Term"
                 style={{ width: "55%" }}
-                allowClear
                 value={tagPattern}
-                onPressEnter={addNewTag}
                 onChange={(e) => setTagPattern(e.target.value)}
             />
-            <Input
+            <TextField.Root
                 placeholder="Flags"
                 style={{ width: "15%" }}
                 value={tagPatternFlags}
-                onPressEnter={addNewTag}
                 onChange={(e) => setTagPatternFlags(e.target.value)}
             />
-            <Button style={{ width: "10%" }} onClick={addNewTag} type="primary">Add</Button>
-        </Space.Compact>
+            <Button style={{ width: "10%" }} onClick={addNewTag}>Add</Button>
+        </Box>
     )
 }
 
@@ -57,23 +53,24 @@ interface SearchFilterProps {
     onTextSearch: (needle: string | undefined) => void
 }
 const SearchFilter = ({onTextSearch}: SearchFilterProps) => { 
-    const { Search } = Input;
-    const onSearchInput: SearchProps['onSearch'] = (value) =>  {
-        if(value.length >= 3) {
-            onTextSearch(value)
-        } else if (value.length == 0) {
-            onTextSearch(undefined)
-        }
-    }
+    // const { Search } = Input;
+    // const onSearchInput: SearchProps['onSearch'] = (value) =>  {
+    //     if(value.length >= 3) {
+    //         onTextSearch(value)
+    //     } else if (value.length == 0) {
+    //         onTextSearch(undefined)
+    //     }
+    // }
 
     return (
-        <Search
-            placeholder="input search text"
-            allowClear
-            onSearch={onSearchInput}
-            onChange={(e) => {if(e.target.value.length >= 3) { onTextSearch(e.target.value)}}}
-            enterButton
-        />
+    <TextField.Root
+        onChange={(e) => {if(e.target.value.length >= 3) { onTextSearch(e.target.value)}}}
+        // onSearch={onSearchInput}
+        placeholder="Search the posts…">
+        <TextField.Slot>
+        <MagnifyingGlassIcon height="16" width="16" />
+        </TextField.Slot>
+    </TextField.Root>  
     )
 }
 
@@ -84,7 +81,7 @@ interface CustomFiltersProps {
 const CustomFilters = ({onTagAdd, onSearch}: CustomFiltersProps) => {
 
     return (
-        <Flex gap="middle" vertical>
+        <Flex gap="middle" direction="row">
             <CustomTagFilter onTagAdd={onTagAdd} />
             <SearchFilter onTextSearch={onSearch} />
         </Flex>

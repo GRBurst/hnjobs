@@ -1,4 +1,4 @@
-import { List } from "antd";
+import { DataList, Flex } from "@radix-ui/themes";
 import { HashSet } from "effect";
 import { useState } from "react";
 import sanitizeHtml from "sanitize-html";
@@ -50,13 +50,8 @@ interface ItemListProps {
   tagFilters: TagFilter[];
   searchFilter: string | undefined;
 }
-const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
-  <List
-    className="job-list"
-    itemLayout="horizontal"
-    dataSource={items ?? []}
-    renderItem={(item) => {
-      const highlightedText = getHighlightedText(
+const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => {
+      const highlightText = (item: Item) => getHighlightedText(
         sanitizeHtml(item.text ?? ""),
         searchFilter !== undefined
           ? [
@@ -65,19 +60,20 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
             ]
           : tagFilters
       );
-      return (
-        <List.Item key={item.id} className="job-list-item">
-          <div>
-            <div>
-              {item.by} at {new Date(1000 * item.time).toLocaleString()}
-            </div>
-            <div dangerouslySetInnerHTML={{ __html: highlightedText }} />
-          </div>
-        </List.Item>
-      );
-    }}
-  />
-);
+    const listItems = items.map((item) =>
+      <li className="job-list-item">
+        <Flex direction="column" gapY="0">
+          <div>{item.by} at {new Date(1000 * item.time).toLocaleString()}</div>
+          <div dangerouslySetInnerHTML={{ __html: highlightText(item) }} />
+        </Flex>
+      </li>
+    )
+    return (
+      <ul className="job-list">
+        {listItems}
+      </ul>
+    )
+}
 
 interface FilterableJobListProps {
   items: Item[];

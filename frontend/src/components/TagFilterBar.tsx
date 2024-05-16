@@ -1,11 +1,10 @@
-import { CSSProperties, Fragment, ReactNode } from 'react'
-import { Collapse, Flex, Button } from "antd"
-import type { CollapseProps } from 'antd';
+import { CSSProperties, Fragment, ReactNode } from 'react';
+import { Flex, Button } from "@radix-ui/themes";
+import * as Collapsible from "@radix-ui/react-collapsible";
 
-
-import { CustomFilters } from './CustomFilters'
-import { HashSet as HSet } from "effect"
-import { TagFilter as TagF, TagFilters } from "../models/TagFilter"
+import { CustomFilters } from './CustomFilters';
+import { HashSet as HSet } from "effect";
+import { TagFilter as TagF, TagFilters } from "../models/TagFilter";
 
 interface TagProps {
     tagFilter: TagF
@@ -15,7 +14,7 @@ interface TagProps {
 }
 
 function TagButton({ tagFilter, filterKey, isActive, onActiveChange }: TagProps): ReactNode {
-    return <Button type={isActive ? "primary" : "default"} onClick={() => onActiveChange(filterKey, tagFilter)}>{tagFilter.name}</Button>
+    return <Button variant={isActive ? "solid" : "surface"} onClick={() => onActiveChange(filterKey, tagFilter)}>{tagFilter.name}</Button>
 }
 
 TagButton.defaultProps = {
@@ -41,7 +40,7 @@ function TagFilterBar({allTags, activeTags, onActive, onInactive, onTagAdd, onSe
     }
     
     const filterNonEmpty = Array.from(activeTags.keys()).reduce((acc, key) => acc || Array.from(activeTags.get(key) ?? []).length > 0, false)
-    const panelStyle: CSSProperties = { border: 'none' };
+    // const panelStyle: CSSProperties = { border: 'none' };
     
     const activeFiltersDisplay = (filterNonEmpty) ? <>
         <h3>Active Filter</h3>
@@ -55,35 +54,36 @@ function TagFilterBar({allTags, activeTags, onActive, onInactive, onTagAdd, onSe
         </Flex>
         </> : <></>
 
-    const collapsableTagFilters: CollapseProps['items'] = (
+    const collapsableTagFilters = (
         Array.from(allTags.keys()).map((tagKey) => (
-            {
-                key: tagKey,
-                label: <h3 key={`${tagKey}-header`}>{tagKey}</h3>,
-                children: (
-                    <Flex key={tagKey} wrap="wrap" gap="small" className="filter-list">
-                        { Array.from(HSet.difference(allTags.get(tagKey) ?? HSet.empty(), activeTags.get(tagKey) ?? HSet.empty())).sort(tagSort).map(tag => 
-                            <TagButton key={tagKey+tag.name} filterKey={tagKey} tagFilter={tag} isActive={false} onActiveChange={onActive} />)
-                        }
-                    </Flex>
-                ),
-                style: panelStyle
-            }
+        <Collapsible.Root>
+            <Collapsible.Trigger asChild>
+                <h3 key={`${tagKey}-header`}>{tagKey}</h3>
+            </Collapsible.Trigger>
+            <Collapsible.Content key={tagKey}>
+                <Flex key={tagKey} wrap="wrap" gap="small" className="filter-list">
+                    { Array.from(HSet.difference(allTags.get(tagKey) ?? HSet.empty(), activeTags.get(tagKey) ?? HSet.empty())).sort(tagSort).map(tag => 
+                        <TagButton key={tagKey+tag.name} filterKey={tagKey} tagFilter={tag} isActive={false} onActiveChange={onActive} />)
+                    }
+                </Flex>
+            </Collapsible.Content>
+        </Collapsible.Root>
         ))
     )
 
-    const collapsableCustomFilter: CollapseProps['items'] = [
-            {
-                key: "custom",
-                label: <h3>Custom Filters</h3>,
-                children: <CustomFilters onTagAdd={onTagAdd} onSearch={onSearch} />,
-                style: panelStyle
-            }
-        ]
-    
+    // const collapsableCustomFilter: CollapseProps['items'] = [
+    //         {
+    //             key: "custom",
+    //             label: <h3>Custom Filters</h3>,
+    //             children: <CustomFilters onTagAdd={onTagAdd} onSearch={onSearch} />,
+    //             style: panelStyle
+    //         }
+    //     ]
+    // callapsibleItems={[...collapsableTagFilters, ...collapsableCustomFilter]}
+
     return <div className="filter-bar">
         {activeFiltersDisplay}
-        <Collapse items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
+        {collapsableTagFilters}
         </div>
 }
 

@@ -1,9 +1,14 @@
+import "@radix-ui/themes/styles.css";
+import "./index.css";
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 
+import { Theme } from '@radix-ui/themes';
+
 import { FirebaseAppProvider } from "reactfire";
 import HnJobs from "./components/HnJobs";
-import "./index.css";
+
 
 const firebaseConfig = {
   databaseURL: "https://hacker-news.firebaseio.com",
@@ -18,8 +23,10 @@ const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <FirebaseAppProvider firebaseConfig={firebaseConfig}>
-      <HnJobs />
-    </FirebaseAppProvider>
+    <Theme>
+      <FirebaseAppProvider firebaseConfig={firebaseConfig}>
+        <HnJobs />
+      </FirebaseAppProvider>
+    </Theme>
   </React.StrictMode>
 );
