@@ -13,7 +13,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { AskHn, Item, User } from "../models/Item";
 import { getItemsFromIds } from "../utils/hn";
-import { getDbKids, writeComments } from "../utils/persistence";
+import { getDbKids } from "../utils/persistence";
 
 import { Schema } from "@effect/schema";
 import { ParseError } from "@effect/schema/ParseResult";
