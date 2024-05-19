@@ -21,7 +21,7 @@ export type Item = typeof Item.Type
 
 
 export const User = Schema.Struct({
-  id: Schema.Number,
+  id: Schema.String,
   created: Schema.Number,
   karma: Schema.Number,
   about: Schema.optional(Schema.String),

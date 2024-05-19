@@ -46,16 +46,16 @@ const filterByRegexAny = (haystack: string | undefined, patterns: RegExp[]): boo
         .reduce<boolean>((acc, pattern) => acc || (haystack !== undefined && haystack.search(pattern) > -1), false)
 
 const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolean => {
-    console.log("haystack: ", haystack)
-    console.log("patterns: ", patterns)
+    console.debug("haystack: ", haystack)
+    console.debug("patterns: ", patterns)
     return patterns
         .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
 }
 
 const replaceTagCaptureGroup = (tag: TagFilter) => TagFilter({name: tag.name, pattern: RegExp(tag.pattern.source.replace(/(\()([^(:?)].*\))/, "(:?$2"), tag.pattern.flags)})
 
-const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, filterFlagged: boolean = true) => {
-    console.log("items: ", items)
+const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
+    console.debug("items: ", items)
     try {
         return items
             .filter(item => item.id == item.id || parentFilter == parentFilter || filterFlagged == filterFlagged || tagFilters == tagFilters || searchFilter == searchFilter || true)
@@ -67,12 +67,13 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
                 && !(filterFlagged && item.text?.toLowerCase().includes("[dead]"))
                 && (filterFlagged && (item.dead !== undefined && item.dead !== null ? item.dead == false : true))
                 && (parentFilter !== undefined && parentFilter !== null ? item.parent == parentFilter : true)
+                && (userFilter !== undefined && userFilter !== null ? item.by == userFilter : true)
             )
             .filter(item => filterByRegex(item.text, tagFilters.map(tag => tag.pattern)))
             .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
             .reverse()
     } catch (e) {
-        console.log(e)
+        console.debug(e)
         return []
     }
 }

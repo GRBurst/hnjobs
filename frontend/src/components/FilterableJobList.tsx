@@ -27,8 +27,8 @@ const getHighlightedText = (
   const patterns = sorted.map((p) => p.pattern.source).join("|");
   const parts = text.split(RegExp(`(${patterns})`, "gim"));
 
-  console.log(patterns);
-  console.log(parts);
+  console.debug(patterns);
+  console.debug(parts);
 
   // Not very efficient but good enough for now
   const highlightedText = parts
@@ -82,11 +82,13 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
 interface FilterableJobListProps {
   items: Item[];
   parentItemId: number | undefined;
+  userId: string | undefined;
   filterTags: Map<string, TagFilters>;
 }
 const FilterableJobList = ({
-  parentItemId,
   items,
+  parentItemId,
+  userId,
   filterTags,
 }: FilterableJobListProps) => {
   const [allTagFilters, setAllTagFilters] =
@@ -156,15 +158,16 @@ const FilterableJobList = ({
     return diffMap;
   };
 
-  console.log("ItemList: ", items);
+  console.debug("ItemList: ", items);
   const filteredItems = itemFilter(
     items ?? [],
     flatFilters(activeTagFilters),
     searchFilter,
-    parentItemId
+    parentItemId,
+    userId
   );
 
-  console.log("FilteredItemList: ", filteredItems);
+  console.debug("FilteredItemList: ", filteredItems);
 
   return (
     <>

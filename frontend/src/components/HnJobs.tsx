@@ -47,8 +47,9 @@ const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
 
   return (
     <FilterableJobList
-      parentItemId={parentItemId}
       items={[...allItems]}
+      parentItemId={parentItemId}
+      userId={undefined}
       filterTags={filterTags}
     />
   );
@@ -89,8 +90,9 @@ const FilterableSqliteList = ({ filterTags }: FilterableLocalListProps) => {
 
   return (
     <FilterableJobList
-      parentItemId={parentItemId}
       items={[...allItems]}
+      parentItemId={parentItemId}
+      userId={undefined}
       filterTags={filterTags}
     />
   );
@@ -101,6 +103,7 @@ interface WhoIsHiringProps {
 }
 const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
   const [allItems, setAllItems] = useState<Item[]>([]);
+  const [threadId, setThreadId] = useState<number | undefined>(undefined);
   const whoishiring = "whoishiring";
 
   const userRef = `v0/user/${whoishiring}`;
@@ -113,8 +116,9 @@ const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
     useDatabaseObjectData<User>(endpointRef);
 
   const threadProgram = useCallback(
-    (askDbRef: DatabaseReference, user: User) =>
-      pipe(
+    (askDbRef: DatabaseReference, user: User) => {
+      let parentId: undefined | number = undefined // TODO: how is traverse impl in effect?
+      return pipe(
         getItemsFromIds(
           askDbRef,
           user.submitted?.slice(0, 3) ?? [],
@@ -132,13 +136,15 @@ const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
             )
             .at(0)
         ),
+        Effect.tap((ask) => parentId = ask?.id),
         Effect.map((ask) => ask?.kids ?? []),
         Effect.tap((askKids) => console.log("mapped kids", askKids)),
-        Effect.flatMap((itemKids) =>
-          getItemsFromIds(dbRef, itemKids, (x) => x)
-        ),
-        Effect.tap((itemKids) => console.log("final kids", itemKids))
-      ),
+        Effect.flatMap((itemKids) => getItemsFromIds(dbRef, itemKids, (x) => x)),
+        Effect.tap((itemKids) => console.log("final kids", itemKids)),
+        Effect.map((finalKids) => ({"id": parentId, "comments": finalKids ?? []})),
+        Effect.map((finalKids) => Schema.decodeUnknownEither(AskHn)(finalKids)),
+      )
+    },
     [dbRef]
   );
 
@@ -150,10 +156,13 @@ const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
   useMemo(() => {
     if (receivedUser) {
       Effect.runPromise(threadProgram(dbRef, receivedUser)).then(
-        (receivedItems) => {
-          console.log("items: ", receivedItems);
-          setAllItems(receivedItems);
-          writeComments([receivedItems]);
+        (askHn) => {
+          console.log("askHn: ", askHn);
+          if(Either.isRight(askHn)) {
+            setAllItems([...askHn.right.comments]);
+            setThreadId(askHn.right.id)
+            // writeComments([[...askHn.right.comments]]);
+          }
         }
       );
     }
@@ -161,8 +170,9 @@ const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
 
   return (
     <FilterableJobList
-      parentItemId={receivedUser?.id}
       items={allItems ?? []}
+      parentItemId={threadId}
+      userId={undefined}
       filterTags={filterTags}
     />
   );
@@ -189,7 +199,7 @@ function HnJobs() {
   return (
     <>
       <DatabaseProvider sdk={database}>
-        <h1>HackerNews Jobs 💥</h1>
+        <h1>HackerNews Jobs 🚀</h1>
         {getList(import.meta.env.VITE_DATA_SOURCE)}
       </DatabaseProvider>
     </>
