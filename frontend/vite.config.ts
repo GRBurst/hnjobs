@@ -12,6 +12,7 @@ export default defineConfig({
       },
     },
   },
+  base: "/hnjobs/",
   plugins: [react(), preload()],
   worker: {
     format: 'es',
