@@ -52,6 +52,7 @@ interface ItemListProps {
 }
 const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
   <List
+    loading={!Array.isArray(items) || items.length == 0}
     className="job-list"
     itemLayout="horizontal"
     dataSource={items ?? []}
