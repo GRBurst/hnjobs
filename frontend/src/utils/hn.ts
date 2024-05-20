@@ -30,8 +30,8 @@ const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<
     return result;
 }
 
-const getItemsFromIds = <T,>(dbRef: DatabaseReference, itemIdsHolder: Iterable<T>, itemIdExtractor: (itemIdHolder: T) => number): Effect.Effect<Item[], Error> => Effect.forEach(itemIdsHolder, (idHolder: T) => getItemFromId(dbRef, itemIdExtractor(idHolder)));
 
+const getItemsFromIds = <T,>(dbRef: DatabaseReference, itemIdsHolder: Iterable<T>, itemIdExtractor: (itemIdHolder: T) => number): Effect.Effect<Item[], Error> => Effect.forEach(itemIdsHolder, (idHolder: T) => getItemFromId(dbRef, itemIdExtractor(idHolder)), { concurrency: "unbounded", batching: true});
 const getItemsFromQueryId = (dbRef: DatabaseReference, queryItem: QueryChange): Effect.Effect<Item, Error> => getItemFromId(dbRef, queryItem.snapshot.val())
 const getItemsFromQueryIds = (dbRef: DatabaseReference, itemIds: QueryChange[]): Effect.Effect<Item[], Error> => {
     return getItemsFromIds(dbRef, itemIds, idHolder => idHolder.snapshot.val())
