@@ -74,7 +74,7 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
   }, [dbRef, thread]);
 
   if (endpointStatus == "loading") {
-    return <Spin />;
+    return <Spin tip="Loading" size="large" style={{width: "100%", padding: "64px"}} />;
   }
 
   return (
