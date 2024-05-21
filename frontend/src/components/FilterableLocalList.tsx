@@ -18,7 +18,7 @@ export const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) =>
 
   useMemo(() => {
     console.log("Using local data from comments.json");
-    axios.get("http://localhost:5173/comments.json").then((response) => {
+    axios.get("http://localhost:5173/hnjobs/comments.json").then((response) => {
       const decodeHn = Schema.decodeUnknownEither(AskHn);
       const current: Either.Either<AskHn, ParseError> = decodeHn(
         response.data.threads[0]
