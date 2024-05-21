@@ -1,11 +1,15 @@
 # HnJobs
 
+Online at https://grburst.github.io/hnjobs
+
 ## Technologies + Frameworks
 
-- React TypeScript Frontend
-- Vite hot reloading and serving
-- devbox for a reproducible dev environment
-- direnv to automatically load dev environment when entering project directory
+- [React](https://react.dev/) TypeScript Frontend
+- [Vite](https://vitejs.dev/) hot reloading and serving
+- [devbox](https://github.com/jetify-com/devbox) for a reproducible dev environment
+- [direnv](https://github.com/direnv/direnv) to automatically load dev environment when entering project directory
+- [Reactfire](https://github.com/FirebaseExtended/reactfire/blob/main/docs/quickstart.md) for Realtime Database connection to Hackernews Firabase
+- [sqlite-wasm-http](https://github.com/mmomtchev/sqlite-wasm-http#readme) for partial requests to static served sqlite3 db (not online yet)
 
 ## Setup
 
@@ -32,3 +36,4 @@ For the frontend, `cd` to `frontend` folder and run `yarn dev` or run `yarn` as 
 ```bash
 yarn --cwd ./frontend dev
 ```
+
