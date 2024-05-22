@@ -12,7 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.6",
     "@effect/schema": "^0.67.2",
-    "antd": "^5.16.2",
+    "antd": "^5.17.3",
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
     "effect": "^3.0.3",

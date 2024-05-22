@@ -59,7 +59,7 @@ function TagFilterBar({allTags, activeTags, onActive, onInactive, onTagAdd, onSe
         Array.from(allTags.keys()).map((tagKey) => (
             {
                 key: tagKey,
-                label: <h3 key={`${tagKey}-header`}>{tagKey}</h3>,
+                label: <h3 className="filter" key={`${tagKey}-header`}>{tagKey}</h3>,
                 children: (
                     <Flex key={tagKey} wrap="wrap" gap="small" className="filter-list">
                         { Array.from(HSet.difference(allTags.get(tagKey) ?? HSet.empty(), activeTags.get(tagKey) ?? HSet.empty())).sort(tagSort).map(tag => 
@@ -75,7 +75,7 @@ function TagFilterBar({allTags, activeTags, onActive, onInactive, onTagAdd, onSe
     const collapsableCustomFilter: CollapseProps['items'] = [
             {
                 key: "custom",
-                label: <h3>Custom Filters</h3>,
+                label: <h3 className="filter">Custom Filters</h3>,
                 children: <CustomFilters onTagAdd={onTagAdd} onSearch={onSearch} />,
                 style: panelStyle
             }

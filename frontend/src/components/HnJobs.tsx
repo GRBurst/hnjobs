@@ -41,7 +41,7 @@ function HnJobs() {
   return (
     <>
       <DatabaseProvider sdk={database}>
-        <h1>HackerNews Jobs 🚀</h1>
+        <h1 className="hntitle">HackerNews Jobs 🚀</h1>
         {getList(import.meta.env.VITE_DATA_SOURCE)}
       </DatabaseProvider>
     </>
