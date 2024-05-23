@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import preload from 'vite-plugin-preload'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import preload from 'vite-plugin-preload';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +17,6 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
-  // assetsInclude: ['hnjobs.db'],
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',

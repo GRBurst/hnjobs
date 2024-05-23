@@ -6,7 +6,7 @@ processes:
     command: yarn --cwd ./frontend install --color=always
 
   vite-dev:
-    command: yarn --cwd ./frontend dev --port 5173 --strictPort
+    command: yarn --cwd ./frontend dev --host 0.0.0.0 --port 12345 --strictPort
     ports:
       - 5173:5173
     depends_on:
