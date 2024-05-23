@@ -26,7 +26,7 @@ const getComments = (): Effect.Effect<AskHn[], Error> => pipe(
 
 
 const getDbKids = async (): Promise<RowArray[]> => {
-    const remoteURL = "http://localhost:5173/hnjobs.db"
+    const remoteURL = "/hnjobs.db"
     const pool = await createSQLiteHTTPPool({ workers: 8 });
     await pool.open(remoteURL);
     const kids = await pool.exec("SELECT * from item");
