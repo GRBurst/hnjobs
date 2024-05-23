@@ -23,7 +23,12 @@ body {
   min-height: 100vh;
 }
 
+pre {
+  white-space: pre-wrap;
+}
+
 .hntitle {
+  margin-top: 0;
   text-align: center;
 }
 
@@ -40,6 +45,16 @@ h3.filter {
   display: flex;
 }
 
-pre {
-  white-space: pre-wrap;
+.github-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 0px;
+  width: 40px;
+  height: 40px;
+}
+
+.github-icon > img {
+  width: 40px;
+  height: 40px;
 }

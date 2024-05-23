@@ -5,6 +5,7 @@ import { FirebaseAppProvider } from "reactfire";
 import HnJobs from "./components/HnJobs";
 import "./index.css";
 
+import { GithubIcon } from "./components/Icons";
 const firebaseConfig = {
   databaseURL: "https://hacker-news.firebaseio.com",
 };
@@ -21,5 +22,6 @@ root.render(
     <FirebaseAppProvider firebaseConfig={firebaseConfig}>
       <HnJobs />
     </FirebaseAppProvider>
+    <GithubIcon url="https://grburst.github.io/hnjobs" />
   </React.StrictMode>
 );
