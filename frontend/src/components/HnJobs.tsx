@@ -11,7 +11,7 @@ import {
 
 import { TagFilter } from "../models/TagFilter";
 
-import { locations, technologies } from "../utils/predefined";
+import { locations, technologies, misc } from "../utils/predefined";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
@@ -24,6 +24,7 @@ function HnJobs() {
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
   predefinedFilterTags.set("Technologies", technologies);
   predefinedFilterTags.set("Locations", locations);
+  predefinedFilterTags.set("Misc", misc);
 
   const getList = (source: string): JSX.Element => {
     if (source == "local") {

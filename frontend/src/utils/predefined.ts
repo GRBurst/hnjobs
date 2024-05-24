@@ -152,5 +152,10 @@ export const locations = HashSet.fromIterable([
     TagFilterSimple("Hangzhou"),
     TagFilterSimple("Bratislava"),
     TagFilterSimple("Braga"),
-    TagFilterSimple("Geneve")
+    TagFilterSimple("Geneve"),
+])
+
+export const misc = HashSet.fromIterable([
+    TagFilterSimple("Diversity"),
+    TagFilterSimple("Equity"),
 ])
