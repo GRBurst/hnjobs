@@ -1,12 +1,14 @@
-import { CSSProperties, Fragment, ReactNode } from 'react';
-import { Collapse, Flex, Button } from "antd";
+import { CSSProperties, Fragment, ReactNode, useContext, useState } from 'react';
+import { Collapse, Drawer, Flex, Button } from "antd";
 import type { CollapseProps } from 'antd';
+import { EditFilled } from '@ant-design/icons';
 
 
 import { CustomFilters } from './CustomFilters';
 import { HashSet as HSet } from "effect";
 import { TagFilter as TagF, TagFilters } from "../models/TagFilter";
 import { AppConfig } from '../utils/config';
+import { ConfigContext } from 'antd/es/config-provider';
 
 interface TagProps {
     tagFilter: TagF
@@ -33,8 +35,11 @@ interface TagFilterProps {
     onSearch: (needle: string | undefined) => void
 }
 
-// TODO: Drawer instead of Collapsible?
-function TagFilterBar({ allTags, activeTags, onActive, onInactive, onTagAdd, onSearch }: TagFilterProps) {
+const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onSearch }: TagFilterProps) => {
+    const [open, setOpen] = useState(false);
+    const appContext = useContext(ConfigContext)
+
+
     const tagSort = (t1: TagF, t2: TagF): number => {
         if (t1.name == "Remote") return -1
         if (t2.name == "Remote") return 1
@@ -42,11 +47,9 @@ function TagFilterBar({ allTags, activeTags, onActive, onInactive, onTagAdd, onS
         return (t1.name < t2.name) ? -1 : 1
     }
 
-    const filterNonEmpty = Array.from(activeTags.keys()).reduce((acc, key) => acc || Array.from(activeTags.get(key) ?? []).length > 0, false)
     const panelStyle: CSSProperties = { border: 'none' };
 
-    const activeFiltersDisplay = (filterNonEmpty) ? <>
-        <h3>Active Filter</h3>
+    const activeFiltersDisplay = <>
         <Flex wrap="wrap" gap="small" className="filter-list">
             {Array.from(activeTags.keys()).map((key) =>
                 Array.from(activeTags.get(key) ?? []).length > 0 ? (
@@ -55,7 +58,7 @@ function TagFilterBar({ allTags, activeTags, onActive, onInactive, onTagAdd, onS
                 ) : <Fragment key={key}></Fragment>
             )}
         </Flex>
-    </> : <></>
+    </>
 
     const collapsableTagFilters: CollapseProps['items'] = (
         Array.from(allTags.keys()).map((tagKey) => (
@@ -83,10 +86,21 @@ function TagFilterBar({ allTags, activeTags, onActive, onInactive, onTagAdd, onS
         }
     ]
 
-    return <div className="filter-bar">
-        {activeFiltersDisplay}
-        <Collapse items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
-    </div>
+    return (<>
+        <div className="filter-bar">
+            <Flex gap={12}>
+                <h3>Active Filters</h3>
+                <EditFilled onClick={() => setOpen(true)} style={{ color: appContext.theme?.token?.colorPrimary }} />
+            </Flex>
+            {activeFiltersDisplay}
+        </div>
+        <Drawer title="Filters" size="large" onClose={() => setOpen(false)} open={open}>
+            {activeFiltersDisplay}
+            <div className="filter-bar">
+                <Collapse items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
+            </div>
+        </Drawer>
+    </>)
 }
 
-export { TagFilterBar, TagButton }
+export { TagButton, TagFilterDrawer }

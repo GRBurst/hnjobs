@@ -6,7 +6,7 @@ import sanitizeHtml from "sanitize-html";
 import { Item } from "../models/Item";
 import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
 import { filterByRegexAny, flatFilters, itemFilter } from "../utils/hn";
-import { TagFilterBar } from "./TagFilterBar";
+import { TagFilterDrawer } from "./TagFilterBar";
 import { AppConfig } from "../utils/config";
 
 const getHighlightedText = (
@@ -173,7 +173,7 @@ const FilterableJobList = ({
 
   return (
     <>
-      <TagFilterBar
+      <TagFilterDrawer
         allTags={allTagFilters}
         activeTags={filterDiff(allTagFilters, activeTagFilters)}
         onActive={(key: string, tag: TagFilter) =>
