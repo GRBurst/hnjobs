@@ -1,6 +1,6 @@
 import type { HashSet } from "effect/HashSet";
 
-import { lazy } from "react";
+import { lazy, useEffect, useState } from "react";
 
 import { getDatabase } from "firebase/database";
 import {
@@ -8,7 +8,9 @@ import {
   useFirebaseApp,
 } from "reactfire";
 
+import { App, ConfigProvider, theme } from "antd";
 
+import { GithubIcon } from "./Icons";
 import { TagFilter } from "../models/TagFilter";
 
 import { locations, technologies, misc } from "../utils/predefined";
@@ -17,7 +19,10 @@ const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
 const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
 
-function HnJobs() {
+const HnJobs = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
   const app = useFirebaseApp();
   const database = getDatabase(app);
 
@@ -39,12 +44,38 @@ function HnJobs() {
     }
   };
 
+  useEffect(() => {
+    // Set mode to value during mount
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+    setIsDarkMode(prefersDarkMode);
+    console.info("Setting color mode to: ", prefersDarkMode ? "dark" : "light");
+
+    // Add event listener to switch if theme is changed afterwards
+    window.matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', event => {
+        const colorScheme = event.matches ? "dark" : "light";
+        console.info("Changing color mode to: ", colorScheme);
+        setIsDarkMode(true);
+      });
+  }, []);
+
   return (
     <>
-      <DatabaseProvider sdk={database}>
-        <h1 className="hntitle">HackerNews Jobs 🚀</h1>
-        {getList(import.meta.env.VITE_DATA_SOURCE)}
-      </DatabaseProvider>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#ff6600",
+          },
+          algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
+        }}>
+        <App>
+          <h1 className="hntitle">HackerNews Jobs 🚀</h1>
+          <DatabaseProvider sdk={database}>
+            {getList(import.meta.env.VITE_DATA_SOURCE)}
+          </DatabaseProvider>
+          <GithubIcon url="https://grburst.github.io/hnjobs" darkMode={isDarkMode} />
+        </App>
+      </ConfigProvider>
     </>
   );
 }
