@@ -23,11 +23,6 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #141414;
-  }
-}
 
 pre {
   white-space: pre-wrap;
@@ -63,4 +58,17 @@ h3.filter {
 .github-icon > img {
   width: 40px;
   height: 40px;
+}
+
+.search-terms-highlight {
+  background-color: #f609;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #141414;
+  }
+  .search-terms-highlight {
+    color: #fff;
+  }
 }

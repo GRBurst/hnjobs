@@ -38,7 +38,7 @@ const getHighlightedText = (
         textWord,
         sorted.map((f) => f.pattern)
       )
-        ? `<mark className="search-terms-highlight">${textWord}</mark>`
+        ? `<mark class="search-terms-highlight">${textWord}</mark>`
         : textWord
     )
     .join("");
