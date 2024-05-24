@@ -97,7 +97,7 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
         <Drawer title="Filters" size="large" onClose={() => setOpen(false)} open={open}>
             {activeFiltersDisplay}
             <div className="filter-bar">
-                <Collapse items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
+                <Collapse accordion items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
             </div>
         </Drawer>
     </>)
