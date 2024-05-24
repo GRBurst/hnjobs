@@ -7,6 +7,7 @@ import { Item } from "../models/Item";
 import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
 import { filterByRegexAny, flatFilters, itemFilter } from "../utils/hn";
 import { TagFilterBar } from "./TagFilterBar";
+import { AppConfig } from "../utils/config";
 
 const getHighlightedText = (
   text: string | undefined,
@@ -183,13 +184,11 @@ const FilterableJobList = ({
         }
         onTagAdd={(key: string, tag: TagFilter) => {
           addFilters(key, tag, allTagFilters, setAllTagFilters)
-          //TODO: put name at central place
           localStorage.setItem(
-            "CustomFilters",
-            JSON.stringify(Array.from(allTagFilters.get("Custom") ?? []).map(f => tagFilterToString(f)))
+            AppConfig.tagFilters.custom.localStorageKey,
+            JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
           )
-        }
-        }
+        }}
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
       />
       <ItemList

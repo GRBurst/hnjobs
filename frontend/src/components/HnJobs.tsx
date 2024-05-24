@@ -15,6 +15,7 @@ import { GithubIcon } from "./Icons";
 import { TagFilter, tagFilterFromString } from "../models/TagFilter";
 
 import { locations, technologies, misc } from "../utils/predefined";
+import { AppConfig } from "../utils/config";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
@@ -60,11 +61,11 @@ const HnJobs = () => {
       });
 
     // Add custom filters from local storage
-    const customFilters = localStorage.getItem("CustomFilters")
+    const customFilters = localStorage.getItem(AppConfig.tagFilters.custom.localStorageKey)
     if (customFilters) {
       const restoredFilters = JSON.parse(customFilters).map((f: string) => tagFilterFromString(f))
       console.log("Restoring custom filters: ", restoredFilters)
-      predefinedFilterTags.set("Custom", HSet.fromIterable(restoredFilters));
+      predefinedFilterTags.set(AppConfig.tagFilters.custom.sectionName, HSet.fromIterable(restoredFilters));
     }
 
   }, []);

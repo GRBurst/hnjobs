@@ -5,6 +5,7 @@ import type { SearchProps } from "antd/es/input/Search"
 
 import { TagFilter, TagFilterSimple } from "../models/TagFilter"
 import { replaceTagCaptureGroup } from '../utils/hn'
+import { AppConfig } from '../utils/config'
 
 interface CustomTagFilterProps {
     onTagAdd: (key: string, tag: TagFilter) => void
@@ -18,7 +19,7 @@ const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
         if (tagName !== undefined && tagName != "") {
             const newFlags = (tagPatternFlags !== undefined && tagPatternFlags != "") ? tagPattern : "gmi"
             const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(tagPattern, newFlags) }) : TagFilterSimple(tagName)
-            onTagAdd("Custom", replaceTagCaptureGroup(newTag))
+            onTagAdd(AppConfig.tagFilters.custom.sectionName, replaceTagCaptureGroup(newTag))
             setTagName("")
             setTagPattern("")
         }

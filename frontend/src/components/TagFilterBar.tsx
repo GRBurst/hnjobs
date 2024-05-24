@@ -1,11 +1,12 @@
-import { CSSProperties, Fragment, ReactNode } from 'react'
-import { Collapse, Flex, Button } from "antd"
+import { CSSProperties, Fragment, ReactNode } from 'react';
+import { Collapse, Flex, Button } from "antd";
 import type { CollapseProps } from 'antd';
 
 
-import { CustomFilters } from './CustomFilters'
-import { HashSet as HSet } from "effect"
-import { TagFilter as TagF, TagFilters } from "../models/TagFilter"
+import { CustomFilters } from './CustomFilters';
+import { HashSet as HSet } from "effect";
+import { TagFilter as TagF, TagFilters } from "../models/TagFilter";
+import { AppConfig } from '../utils/config';
 
 interface TagProps {
     tagFilter: TagF
@@ -75,8 +76,8 @@ function TagFilterBar({ allTags, activeTags, onActive, onInactive, onTagAdd, onS
 
     const collapsableCustomFilter: CollapseProps['items'] = [
         {
-            key: "custom",
-            label: <h3 className="filter">Custom Filters</h3>,
+            key: AppConfig.tagFilters.custom.sectionName,
+            label: <h3 className="filter">{AppConfig.tagFilters.custom.name}</h3>,
             children: <CustomFilters onTagAdd={onTagAdd} onSearch={onSearch} />,
             style: panelStyle
         }
