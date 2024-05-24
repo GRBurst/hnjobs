@@ -54,7 +54,7 @@ h3.filter {
 .github-icon {
   position: absolute;
   top: 16px;
-  right: 16px;
+  left: 16px;
   padding: 0px;
   width: 40px;
   height: 40px;
