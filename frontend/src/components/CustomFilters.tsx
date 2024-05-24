@@ -22,6 +22,7 @@ const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
             onTagAdd(AppConfig.tagFilters.custom.sectionName, replaceTagCaptureGroup(newTag))
             setTagName("")
             setTagPattern("")
+            setTagPatternFlags("")
         }
     }
 
