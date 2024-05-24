@@ -1,3 +1,4 @@
+import { HashSet as HSet } from "effect";
 import type { HashSet } from "effect/HashSet";
 
 import { lazy, useEffect, useState } from "react";
@@ -11,7 +12,7 @@ import {
 import { App, ConfigProvider, theme } from "antd";
 
 import { GithubIcon } from "./Icons";
-import { TagFilter } from "../models/TagFilter";
+import { TagFilter, tagFilterFromString } from "../models/TagFilter";
 
 import { locations, technologies, misc } from "../utils/predefined";
 
@@ -57,6 +58,15 @@ const HnJobs = () => {
         console.info("Changing color mode to: ", colorScheme);
         setIsDarkMode(true);
       });
+
+    // Add custom filters from local storage
+    const customFilters = localStorage.getItem("CustomFilters")
+    if (customFilters) {
+      const restoredFilters = JSON.parse(customFilters).map((f: string) => tagFilterFromString(f))
+      console.log("Restoring custom filters: ", restoredFilters)
+      predefinedFilterTags.set("Custom", HSet.fromIterable(restoredFilters));
+    }
+
   }, []);
 
   return (

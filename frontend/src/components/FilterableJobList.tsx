@@ -4,7 +4,7 @@ import { useState } from "react";
 import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
-import { TagFilter, TagFilters } from "../models/TagFilter";
+import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
 import { filterByRegexAny, flatFilters, itemFilter } from "../utils/hn";
 import { TagFilterBar } from "./TagFilterBar";
 
@@ -61,9 +61,9 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
         sanitizeHtml(item.text ?? ""),
         searchFilter !== undefined
           ? [
-              ...tagFilters,
-              TagFilter({ name: "_Search_", pattern: RegExp(searchFilter) }),
-            ]
+            ...tagFilters,
+            TagFilter({ name: "_Search_", pattern: RegExp(searchFilter) }),
+          ]
           : tagFilters
       );
       return (
@@ -181,8 +181,14 @@ const FilterableJobList = ({
         onInactive={(key: string, tag: TagFilter) =>
           removeFilters(key, tag, activeTagFilters, setActiveTagFilters)
         }
-        onTagAdd={(key: string, tag: TagFilter) =>
+        onTagAdd={(key: string, tag: TagFilter) => {
           addFilters(key, tag, allTagFilters, setAllTagFilters)
+          //TODO: put name at central place
+          localStorage.setItem(
+            "CustomFilters",
+            JSON.stringify(Array.from(allTagFilters.get("Custom") ?? []).map(f => tagFilterToString(f)))
+          )
+        }
         }
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
       />

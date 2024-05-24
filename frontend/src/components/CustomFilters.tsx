@@ -9,14 +9,15 @@ import { replaceTagCaptureGroup } from '../utils/hn'
 interface CustomTagFilterProps {
     onTagAdd: (key: string, tag: TagFilter) => void
 }
-const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => { 
+const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
     const [tagName, setTagName] = useState<string>("")
     const [tagPattern, setTagPattern] = useState<string>("")
     const [tagPatternFlags, setTagPatternFlags] = useState<string>("")
 
     const addNewTag = () => {
-        if(tagName !== undefined && tagName != "") {
-            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({name: tagName, pattern: RegExp(tagPattern, tagPatternFlags)}) : TagFilterSimple(tagName)
+        if (tagName !== undefined && tagName != "") {
+            const newFlags = (tagPatternFlags !== undefined && tagPatternFlags != "") ? tagPattern : "gmi"
+            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(tagPattern, newFlags) }) : TagFilterSimple(tagName)
             onTagAdd("Custom", replaceTagCaptureGroup(newTag))
             setTagName("")
             setTagPattern("")
@@ -56,10 +57,10 @@ const CustomTagFilter = ({onTagAdd}: CustomTagFilterProps) => {
 interface SearchFilterProps {
     onTextSearch: (needle: string | undefined) => void
 }
-const SearchFilter = ({onTextSearch}: SearchFilterProps) => { 
+const SearchFilter = ({ onTextSearch }: SearchFilterProps) => {
     const { Search } = Input;
-    const onSearchInput: SearchProps['onSearch'] = (value) =>  {
-        if(value.length >= 3) {
+    const onSearchInput: SearchProps['onSearch'] = (value) => {
+        if (value.length >= 3) {
             onTextSearch(value)
         } else if (value.length == 0) {
             onTextSearch(undefined)
@@ -71,7 +72,7 @@ const SearchFilter = ({onTextSearch}: SearchFilterProps) => {
             placeholder="input search text"
             allowClear
             onSearch={onSearchInput}
-            onChange={(e) => {if(e.target.value.length >= 3) { onTextSearch(e.target.value)}}}
+            onChange={(e) => { if (e.target.value.length >= 3) { onTextSearch(e.target.value) } }}
             enterButton
         />
     )
@@ -81,7 +82,7 @@ interface CustomFiltersProps {
     onTagAdd: (key: string, tag: TagFilter) => void
     onSearch: (needle: string | undefined) => void
 }
-const CustomFilters = ({onTagAdd, onSearch}: CustomFiltersProps) => {
+const CustomFilters = ({ onTagAdd, onSearch }: CustomFiltersProps) => {
 
     return (
         <Flex gap="middle" vertical>

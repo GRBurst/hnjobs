@@ -82,4 +82,3 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
 const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
 
 export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemFilter, replaceTagCaptureGroup };
-
