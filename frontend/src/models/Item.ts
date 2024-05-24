@@ -16,6 +16,7 @@ export const Item = Schema.Struct({
   title: Schema.optional(Schema.String),
   parts: Schema.optional(Schema.String),
   descendants: Schema.optional(Schema.Number),
+  detached: Schema.optional(Schema.Boolean), // This is for ourselves
 })
 export type Item = typeof Item.Type
 

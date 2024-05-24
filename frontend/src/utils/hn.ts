@@ -63,6 +63,7 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
                 item.text !== undefined
                 && item.text !== null
                 && item.text != ""
+                && item.detached !== true
                 && !(filterFlagged && item.text?.toLowerCase().includes("[flagged]"))
                 && !(filterFlagged && item.text?.toLowerCase().includes("[dead]"))
                 && (filterFlagged && (item.dead !== undefined && item.dead !== null ? item.dead == false : true))

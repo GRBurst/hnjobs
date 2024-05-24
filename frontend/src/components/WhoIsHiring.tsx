@@ -1,4 +1,4 @@
-import { Effect, Either, pipe } from "effect";
+import { Data, Effect, Either, pipe } from "effect";
 import { useMemo, useState } from "react";
 import { DatabaseReference, ref } from "firebase/database";
 import {
@@ -54,8 +54,32 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
     Effect.succeed(ask),
     Effect.map((ask) => ask.kids ?? []),
     Effect.tap((askKids) => console.log("mapped kids", askKids)),
-    Effect.flatMap((itemKids) => getItemsFromIds(dbRef, itemKids, (x) => x))
+    Effect.flatMap((itemKids) => getItemsFromIds(dbRef, itemKids, i => i))
   );
+
+  const enrichDetachedFlag = (dbRef: DatabaseReference, comments: Item[]): Effect.Effect<Item[], Error> => {
+    const moderatorId = "dang";
+    const filterSubstring = "We detached this";
+    const Item = Data.case<Item>()
+
+    const program = Effect.gen(function* () {
+      const lookupMap = new Map();
+
+      const commentsKids: number[] = comments.map(c => c.kids ?? []).flat()
+      const commentsKidsItems = yield* getItemsFromIds(dbRef, commentsKids, c => c)
+      commentsKidsItems.forEach(c => lookupMap.set(c.id, c))
+
+      const enriched = comments.map(c => {
+        const isDetached = c.kids?.map(kid => lookupMap.get(kid)).some(k => k.by === moderatorId && k.text?.includes(filterSubstring)) || false
+        return Item({...c, ...{"detached": isDetached}})
+      })
+
+      return enriched
+
+    })
+
+    return program
+  }
 
   useMemo(() => {
     if (endpointStatus == "success") {
@@ -69,7 +93,12 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
 
   useMemo(() => {
     if (thread) {
-      Effect.runPromise(getThreadComments(dbRef, thread)).then(comments => setThreadComments(comments));
+      Effect.runPromise(
+        pipe(
+          getThreadComments(dbRef, thread),
+          Effect.flatMap(comments => enrichDetachedFlag(dbRef, comments))
+        )
+      ).then(comments => setThreadComments(comments));
     }
   }, [dbRef, thread]);
 
