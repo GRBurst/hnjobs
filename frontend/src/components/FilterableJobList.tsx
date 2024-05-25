@@ -8,6 +8,7 @@ import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
 import { filterByRegexAny, flatFilters, itemFilter } from "../utils/hn";
 import { TagFilterDrawer } from "./TagFilterBar";
 import { AppConfig } from "../utils/config";
+import { JobStatistics } from "./JobStatistics";
 
 const getHighlightedText = (
   text: string | undefined,
@@ -198,6 +199,11 @@ const FilterableJobList = ({
           )
         }}
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
+      />
+      <JobStatistics
+        allItems={items}
+        items={filteredItems ?? []}
+        activeFilters={flatActive}
       />
       <ItemList
         items={filteredItems}
