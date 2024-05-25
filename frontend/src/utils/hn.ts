@@ -52,8 +52,6 @@ const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolea
         .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
 }
 
-const replaceTagCaptureGroup = (tag: TagFilter) => TagFilter({name: tag.name, pattern: RegExp(tag.pattern.source.replace(/(\()([^(:?)].*\))/, "(:?$2"), tag.pattern.flags)})
-
 const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
     console.debug("items: ", items)
     try {
@@ -81,4 +79,4 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
 
 const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
 
-export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemFilter, replaceTagCaptureGroup };
+export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemFilter };

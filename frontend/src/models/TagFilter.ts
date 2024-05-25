@@ -8,7 +8,7 @@ export interface TagFilter {
 }
 
 export const TagFilter = Data.case<TagFilter>()
-export const TagFilterSimple = (tagName: string) => TagFilter({name: tagName, pattern: RegExp(`(?:^|\\b|\\s)(?:${tagName})(?:$|\\b|\\s)`, "gmi")})
+export const TagFilterSimple = (tagName: string) => TagFilter({name: tagName, pattern: RegExp(`(^|\\b|\\s)(${tagName})($|\\b|\\s)`, "gmi")})
 
 export const tagFilterToString = (tag: TagFilter): string => JSON.stringify({
     name: tag.name,

@@ -26,7 +26,7 @@ const getHighlightedText = (
     r1.name.length < r2.name.length ? 1 : -1
   );
   const patterns = sorted.map((p) => p.pattern.source).join("|");
-  const parts = text.split(RegExp(`(${patterns})`, "gim"));
+  const parts = text.split(RegExp(patterns, "gim"));
 
   console.debug(patterns);
   console.debug(parts);
