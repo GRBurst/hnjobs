@@ -98,6 +98,7 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
         <Drawer title="Filters" size="large" onClose={() => setOpen(false)} open={open}>
             {activeFiltersDisplay}
             <div className="filter-bar">
+                <p>Tags perform full-text search on the posts based on regular expressions. You can create your own tags in the Custom Filter section. Custom Filters are stored in local storage.</p>
                 <Collapse accordion items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
             </div>
         </Drawer>
