@@ -201,7 +201,7 @@ const FilterableJobList = ({
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
       />
       <JobStatistics
-        allItems={items}
+        allItems={items ?? []}
         items={filteredItems ?? []}
         activeFilters={flatActive}
       />

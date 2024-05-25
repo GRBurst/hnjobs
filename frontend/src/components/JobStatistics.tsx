@@ -1,25 +1,10 @@
 import React from "react";
+
+import Chart from "react-apexcharts";
+
 import { Item } from "../models/Item";
-import { Bar } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import { TagFilter } from "../models/TagFilter";
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
 
 interface JobStatisticsProps {
     allItems: Item[],
@@ -28,49 +13,47 @@ interface JobStatisticsProps {
     darkMode: boolean,
 }
 export const JobStatistics = ({ allItems, items, activeFilters, darkMode }: JobStatisticsProps) => {
-    const options = {
-        responsive: true,
-        scales: {
-            x: {
-                stacked: true,
-            },
-            y: {
-                stacked: true,
-            }
+    const options: ApexCharts.ApexOptions = {
+        xaxis: {
+            type: "category"
         },
-        plugins: {
-            legend: {
-                position: 'top' as const,
-            },
-            title: {
-                display: true,
-                text: 'Filtered Data',
-            },
+        legend: {
+            position: "top"
         },
+        theme: {
+            mode: darkMode ? "dark" : "light"
+        }
     };
-
-    const labels = activeFilters.map(f => f.name)
-    const datasets = [
+    const series = [
         {
-            label: "Total",
-            data: activeFilters.map(f =>
-                allItems.filter(item => item.text ? item.text.search(f.pattern) > -1 : false).length,
-            )
+            name: "Shown",
+            data: activeFilters.map(f => (
+                {
+                    x: f.name,
+                    y: items.filter(item => item.text ? item.text.search(f.pattern) > -1 : false).length,
+                }
+            ))
         },
         {
-            label: "Filtered",
-            data: activeFilters.map(f =>
-                items.filter(item => item.text ? item.text.search(f.pattern) > -1 : false).length,
-            )
+            name: "Total",
+            data: activeFilters.map(f => (
+                {
+                    x: f.name,
+                    y: allItems.filter(item => item.text ? item.text.search(f.pattern) > -1 : false).length,
+                }
+            ))
         },
-    ]
-    const data = {
-        labels,
-        datasets: datasets
-    }
+    ];
 
+    if (allItems.length == 0 || items.length == 0 || activeFilters.length == 0) return <></>
     return (
-        <Bar style={{ maxHeight: 200 }} options={options} data={data} />
+        <Chart
+            height={200}
+            type="bar"
+            options={options}
+            series={series}
+            style={{ maxHeight: 200 }}
+        />
     );
 }
 JobStatistics.defaultProps = {
