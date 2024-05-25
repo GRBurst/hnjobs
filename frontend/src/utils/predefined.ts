@@ -14,7 +14,7 @@ export const technologies = HashSet.fromIterable([
     TagFilterSimple("Ruby on Rails"),
     TagFilterSimple("iOS"),
     TagFilterSimple("Android"),
-    TagFilter({name: "C++", pattern: RegExp(/(^|\b|\s)(C\+\+)($|\W|\s)/, "gmi")}),
+    TagFilter({name: "C++", pattern: RegExp(/(^|\b|\s)(C\+\+[0-9]{0,2})($|\W|\s)/, "gmi")}),
     TagFilterSimple("React Native"),
     TagFilterSimple("Rust"),
     TagFilterSimple("Angular"),
@@ -50,7 +50,7 @@ export const technologies = HashSet.fromIterable([
 
 export const locations = HashSet.fromIterable([
     TagFilterSimple("Remote"),
-    TagFilterSimple("San Francisco"),
+    TagFilter({name: "San Francisco / SF", pattern: RegExp(/(^|\b|\s)(San Francisco|SF)($|\b|\s)/, "gmi")}),
     TagFilterSimple("New York City"),
     TagFilterSimple("London"),
     TagFilterSimple("Boston"),
@@ -155,7 +155,30 @@ export const locations = HashSet.fromIterable([
     TagFilterSimple("Geneve"),
 ])
 
+export const role = HashSet.fromIterable([
+    TagFilter({name: "Developer / Engineer", pattern: RegExp(/(^|\b|\s)(Developer|Engineer)($|\b|\s)/, "gmi")}),
+    TagFilterSimple("Developer"),
+    TagFilterSimple("Product Manager"),
+    TagFilterSimple("Data Scientist"),
+    TagFilterSimple("Machine Learning"),
+    TagFilterSimple("AI Engineer"),
+    TagFilterSimple("Software Engineer"),
+    TagFilterSimple("Founding Engineer"),
+    TagFilterSimple("Infrastructure Engineer"),
+    TagFilterSimple("Manager"),
+    TagFilterSimple("Lead"),
+    TagFilterSimple("Staff"),
+    TagFilter({name: "Senior / Sr", pattern: RegExp(/(^|\b|\s)(Senior|Sr)($|\b|\s)/, "gmi")}),
+    TagFilterSimple("Junior"),
+    TagFilterSimple("Backend"),
+    TagFilterSimple("Frontend"),
+    TagFilterSimple("Principal"),
+])
+
 export const misc = HashSet.fromIterable([
     TagFilterSimple("Diversity"),
     TagFilterSimple("Equity"),
+    TagFilterSimple("Inclusion"),
+    TagFilter({name: "Full-Time", pattern: RegExp(/(^|\b|\s)(full.{0,2}time)($|\b|\s)/, "gmi")}),
+    TagFilter({name: "Full-Stack", pattern: RegExp(/(^|\b|\s)(full.{0,2}stack)($|\b|\s)/, "gmi")}),
 ])

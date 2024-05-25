@@ -14,7 +14,7 @@ import { App, ConfigProvider, theme } from "antd";
 import { GithubIcon } from "./Icons";
 import { TagFilter, tagFilterFromString } from "../models/TagFilter";
 
-import { locations, technologies, misc } from "../utils/predefined";
+import { locations, technologies, misc, role } from "../utils/predefined";
 import { AppConfig } from "../utils/config";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
@@ -31,6 +31,7 @@ const HnJobs = () => {
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
   predefinedFilterTags.set("Technologies", technologies);
   predefinedFilterTags.set("Locations", locations);
+  predefinedFilterTags.set("Role", role);
   predefinedFilterTags.set("Misc", misc);
 
   const getList = (source: string): JSX.Element => {

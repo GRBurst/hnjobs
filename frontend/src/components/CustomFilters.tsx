@@ -28,7 +28,7 @@ const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
     return (
         <Space.Compact>
             <Input
-                placeholder="Tag Name"
+                placeholder="Tag Name*"
                 style={{ width: "20%" }}
                 allowClear
                 value={tagName}
@@ -70,7 +70,7 @@ const SearchFilter = ({ onTextSearch }: SearchFilterProps) => {
 
     return (
         <Search
-            placeholder="input search text"
+            placeholder="case-sensitve input search text"
             allowClear
             onSearch={onSearchInput}
             onChange={(e) => { if (e.target.value.length >= 3) { onTextSearch(e.target.value) } }}
@@ -87,6 +87,7 @@ const CustomFilters = ({ onTagAdd, onSearch }: CustomFiltersProps) => {
 
     return (
         <Flex gap="middle" vertical>
+            <p>Only simple regex without subgroup matching are supported. Including subgroups "(...)" might result in unexpected highlight behavior.</p>
             <CustomTagFilter onTagAdd={onTagAdd} />
             <SearchFilter onTextSearch={onSearch} />
         </Flex>
