@@ -75,7 +75,7 @@ const HnJobs = () => {
       <ConfigProvider
         theme={{
           token: {
-            colorPrimary: "#ff6600",
+            colorPrimary: AppConfig.colors.primary,
           },
           algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
         }}>

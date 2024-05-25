@@ -1,6 +1,6 @@
-import { List } from "antd";
 import { HashSet } from "effect";
 import { useState } from "react";
+import { List } from "antd";
 import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
@@ -101,6 +101,7 @@ const FilterableJobList = ({
   const [searchFilter, setSearchFilter] = useState<string | undefined>(
     undefined
   );
+  const flatActive = flatFilters(activeTagFilters)
 
   const updateFilters = (
     key: string,
@@ -146,24 +147,24 @@ const FilterableJobList = ({
     );
   };
 
-  const filterDiff = (
+  const filterIntersection = (
     allFilters: Map<string, TagFilters>,
     activeFilters: Map<string, TagFilters>
   ): Map<string, TagFilters> => {
-    const diffMap = new Map<string, TagFilters>();
+    const intersectionMap = new Map<string, TagFilters>();
     allFilters.forEach((filters, key) =>
-      diffMap.set(
+      intersectionMap.set(
         key,
         HashSet.intersection(filters, activeFilters.get(key) ?? HashSet.empty())
       )
     );
-    return diffMap;
+    return intersectionMap;
   };
 
   console.debug("ItemList: ", items);
   const filteredItems = itemFilter(
     items ?? [],
-    flatFilters(activeTagFilters),
+    flatActive,
     searchFilter,
     parentItemId,
     userId
@@ -175,7 +176,7 @@ const FilterableJobList = ({
     <>
       <TagFilterDrawer
         allTags={allTagFilters}
-        activeTags={filterDiff(allTagFilters, activeTagFilters)}
+        activeTags={filterIntersection(allTagFilters, activeTagFilters)}
         onActive={(key: string, tag: TagFilter) =>
           addFilters(key, tag, activeTagFilters, setActiveTagFilters)
         }
@@ -193,7 +194,7 @@ const FilterableJobList = ({
       />
       <ItemList
         items={filteredItems}
-        tagFilters={flatFilters(activeTagFilters)}
+        tagFilters={flatActive}
         searchFilter={searchFilter}
       />
     </>

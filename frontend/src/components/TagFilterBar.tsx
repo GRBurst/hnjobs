@@ -1,7 +1,7 @@
 import { CSSProperties, Fragment, ReactNode, useContext, useState } from 'react';
-import { Collapse, Drawer, Flex, Button } from "antd";
+import { Collapse, Drawer, Flex, Button, FloatButton } from "antd";
 import type { CollapseProps } from 'antd';
-import { EditFilled } from '@ant-design/icons';
+import { EditFilled, FilterTwoTone } from '@ant-design/icons';
 
 
 import { CustomFilters } from './CustomFilters';
@@ -9,6 +9,7 @@ import { HashSet as HSet } from "effect";
 import { TagFilter as TagF, TagFilters } from "../models/TagFilter";
 import { AppConfig } from '../utils/config';
 import { ConfigContext } from 'antd/es/config-provider';
+import { flatFilters } from '../utils/hn';
 
 interface TagProps {
     tagFilter: TagF
@@ -34,10 +35,10 @@ interface TagFilterProps {
     onTagAdd: (key: string, tag: TagF) => void
     onSearch: (needle: string | undefined) => void
 }
-
 const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onSearch }: TagFilterProps) => {
     const [open, setOpen] = useState(false);
     const appContext = useContext(ConfigContext)
+    const flatActive = flatFilters(activeTags)
 
 
     const tagSort = (t1: TagF, t2: TagF): number => {
@@ -100,6 +101,12 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
                 <Collapse accordion items={[...collapsableTagFilters, ...collapsableCustomFilter]} bordered={false} />
             </div>
         </Drawer>
+        <FloatButton
+            onClick={() => setOpen(true)}
+            badge={{ count: flatActive.length }}
+            tooltip={<div>Edit Filters</div>}
+            icon={<FilterTwoTone twoToneColor={AppConfig.colors.primary} />}
+        />
     </>)
 }
 
