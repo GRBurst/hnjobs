@@ -66,7 +66,9 @@ const HnJobs = () => {
     if (customFilters) {
       const restoredFilters = JSON.parse(customFilters).map((f: string) => tagFilterFromString(f))
       console.log("Restoring custom filters: ", restoredFilters)
+      if (restoredFilters?.length) {
       predefinedFilterTags.set(AppConfig.tagFilters.custom.sectionName, HSet.fromIterable(restoredFilters));
+    }
     }
 
   }, []);

@@ -17,7 +17,7 @@ const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
     const addNewTag = () => {
         if (tagName !== undefined && tagName != "") {
             const newFlags = (tagPatternFlags !== undefined && tagPatternFlags != "") ? tagPattern : "gmi"
-            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(tagPattern, newFlags) }) : TagFilterSimple(tagName)
+            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(`(${tagPattern})`, newFlags) }) : TagFilterSimple(tagName)
             onTagAdd(AppConfig.tagFilters.custom.sectionName, newTag)
             setTagName("")
             setTagPattern("")

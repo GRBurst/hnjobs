@@ -42,7 +42,7 @@ h3.filter {
 }
 
 .filter-list {
-  min-height: 40px;
+  min-height: 22px;
   display: flex;
 }
 

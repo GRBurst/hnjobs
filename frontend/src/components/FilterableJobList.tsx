@@ -190,6 +190,13 @@ const FilterableJobList = ({
             JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
           )
         }}
+        onTagRemove={(key: string, tag: TagFilter) => {
+          removeFilters(key, tag, allTagFilters, setAllTagFilters)
+          localStorage.setItem(
+            AppConfig.tagFilters.custom.localStorageKey,
+            JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
+          )
+        }}
         onSearch={(needle: string | undefined) => setSearchFilter(needle)}
       />
       <ItemList

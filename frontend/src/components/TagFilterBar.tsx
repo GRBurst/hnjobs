@@ -1,5 +1,5 @@
 import { CSSProperties, Fragment, ReactNode, useContext, useState } from 'react';
-import { Collapse, Drawer, Flex, Button, FloatButton } from "antd";
+import { Collapse, Drawer, Flex, FloatButton, Tag } from "antd";
 import type { CollapseProps } from 'antd';
 import { EditFilled, FilterTwoTone } from '@ant-design/icons';
 
@@ -16,15 +16,24 @@ interface TagProps {
     filterKey: string
     isActive: boolean
     onActiveChange: (filterKey: string, tag: TagF) => void
+    deletable: boolean
+    onTagRemove: (filterKey: string, tag: TagF) => void
 }
 
-function TagButton({ tagFilter, filterKey, isActive, onActiveChange }: TagProps): ReactNode {
-    return <Button type={isActive ? "primary" : "default"} onClick={() => onActiveChange(filterKey, tagFilter)}>{tagFilter.name}</Button>
+function TagButton({ tagFilter, filterKey, isActive, onActiveChange, deletable, onTagRemove }: TagProps): ReactNode {
+    return <Tag
+        color={isActive ? AppConfig.colors.primary : "default"}
+        closable={deletable}
+        onClick={() => onActiveChange(filterKey, tagFilter)}
+        onClose={() => deletable ? onTagRemove(filterKey, tagFilter) : {}}
+    >{tagFilter.name}</Tag>
 }
 
 TagButton.defaultProps = {
     isActive: false,
-    onActiveChange: () => { }
+    onActiveChange: () => { },
+    deletable: false,
+    onTagRemove: () => { },
 }
 
 interface TagFilterProps {
@@ -33,9 +42,10 @@ interface TagFilterProps {
     onActive: (key: string, tag: TagF) => void
     onInactive: (key: string, tag: TagF) => void
     onTagAdd: (key: string, tag: TagF) => void
+    onTagRemove: (key: string, tag: TagF) => void
     onSearch: (needle: string | undefined) => void
 }
-const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onSearch }: TagFilterProps) => {
+const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onTagRemove, onSearch }: TagFilterProps) => {
     const [open, setOpen] = useState(false);
     const appContext = useContext(ConfigContext)
     const flatActive = flatFilters(activeTags)
@@ -69,7 +79,7 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
                 children: (
                     <Flex key={tagKey} wrap="wrap" gap="small" className="filter-list">
                         {Array.from(HSet.difference(allTags.get(tagKey) ?? HSet.empty(), activeTags.get(tagKey) ?? HSet.empty())).sort(tagSort).map(tag =>
-                            <TagButton key={tagKey + tag.name} filterKey={tagKey} tagFilter={tag} isActive={false} onActiveChange={onActive} />)
+                            <TagButton key={tagKey + tag.name} filterKey={tagKey} tagFilter={tag} isActive={false} onActiveChange={onActive} deletable={tagKey == AppConfig.tagFilters.custom.sectionName} onTagRemove={onTagRemove} />)
                         }
                     </Flex>
                 ),
@@ -80,7 +90,7 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
 
     const collapsableCustomFilter: CollapseProps['items'] = [
         {
-            key: AppConfig.tagFilters.custom.sectionName,
+            key: `Add${AppConfig.tagFilters.custom.sectionName}`,
             label: <h3 className="filter">{AppConfig.tagFilters.custom.name}</h3>,
             children: <CustomFilters onTagAdd={onTagAdd} onSearch={onSearch} />,
             style: panelStyle
