@@ -66,9 +66,7 @@ h3.filter {
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #141414;
-  }
-  .search-terms-highlight {
     color: #fff;
+    background: #141414;
   }
 }
