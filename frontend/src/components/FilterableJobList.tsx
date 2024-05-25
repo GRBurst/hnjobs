@@ -47,13 +47,13 @@ const getHighlightedText = (
 };
 
 interface ItemListProps {
-  items: Item[];
+  items: Item[] | undefined;
   tagFilters: TagFilter[];
   searchFilter: string | undefined;
 }
 const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
   <List
-    loading={!Array.isArray(items) || items.length == 0}
+    loading={items === undefined || !Array.isArray(items)}
     className="job-list"
     itemLayout="horizontal"
     dataSource={items ?? []}
@@ -82,7 +82,7 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
 );
 
 interface FilterableJobListProps {
-  items: Item[];
+  items: Item[] | undefined;
   parentItemId: number | undefined;
   userId: string | undefined;
   filterTags: Map<string, TagFilters>;
@@ -162,13 +162,13 @@ const FilterableJobList = ({
   };
 
   console.debug("ItemList: ", items);
-  const filteredItems = itemFilter(
-    items ?? [],
+  const filteredItems = items !== undefined ? itemFilter(
+    items,
     flatActive,
     searchFilter,
     parentItemId,
     userId
-  );
+  ) : undefined;
 
   console.debug("FilteredItemList: ", filteredItems);
 

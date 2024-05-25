@@ -9,7 +9,7 @@ export interface FilterableSqliteListProps {
   filterTags: Map<string, TagFilters>;
 }
 export const FilterableSqliteList = ({ filterTags }: FilterableSqliteListProps) => {
-  const [allItems, setAllItems] = useState<readonly Item[]>([]);
+  const [allItems, setAllItems] = useState<readonly Item[] | undefined>(undefined);
   const [parentItemId, setParentItemId] = useState<number | undefined>(
     undefined
   );
@@ -43,7 +43,7 @@ export const FilterableSqliteList = ({ filterTags }: FilterableSqliteListProps) 
 
   return (
     <FilterableJobList
-      items={[...allItems]}
+      items={allItems !== undefined ? [...allItems] : undefined}
       parentItemId={parentItemId}
       userId={undefined}
       filterTags={filterTags} />

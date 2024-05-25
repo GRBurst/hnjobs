@@ -11,7 +11,7 @@ export interface FilterableLocalListProps {
   filterTags: Map<string, TagFilters>;
 }
 export const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) => {
-  const [allItems, setAllItems] = useState<readonly Item[]>([]);
+  const [allItems, setAllItems] = useState<readonly Item[] | undefined>(undefined);
   const [parentItemId, setParentItemId] = useState<number | undefined>(
     undefined
   );
@@ -32,7 +32,7 @@ export const FilterableLocalList = ({ filterTags }: FilterableLocalListProps) =>
 
   return (
     <FilterableJobList
-      items={[...allItems]}
+      items={allItems !== undefined ? [...allItems] : undefined}
       parentItemId={parentItemId}
       userId={undefined}
       filterTags={filterTags} />

@@ -18,7 +18,7 @@ export interface WhoIsHiringProps {
 }
 export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
   const [thread, setThread] = useState<Item | undefined>(undefined);
-  const [threadComments, setThreadComments] = useState<Item[]>([]);
+  const [threadComments, setThreadComments] = useState<Item[] | undefined>(undefined);
   const whoishiring = "whoishiring";
 
   const userRef = `v0/user/${whoishiring}`;
@@ -71,7 +71,7 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
 
       const enriched = comments.map(c => {
         const isDetached = c.kids?.map(kid => lookupMap.get(kid)).some(k => k.by === moderatorId && k.text?.includes(filterSubstring)) || false
-        return Item({...c, ...{"detached": isDetached}})
+        return Item({ ...c, ...{ "detached": isDetached } })
       })
 
       return enriched
@@ -103,12 +103,12 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
   }, [dbRef, thread]);
 
   if (endpointStatus == "loading") {
-    return <Spin tip="Loading" size="large" style={{width: "100%", padding: "64px"}} />;
+    return <Spin tip="Loading" size="large" style={{ width: "100%", padding: "64px" }} />;
   }
 
   return (
     <FilterableJobList
-      items={threadComments ?? []}
+      items={threadComments}
       parentItemId={thread?.id}
       userId={undefined}
       filterTags={filterTags} />
