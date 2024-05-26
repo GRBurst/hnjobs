@@ -5,7 +5,7 @@ import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
 import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
-import { filterByRegexAny, flatFilters, itemFilter } from "../utils/hn";
+import { filterByRegexAny, flatFilters, itemFilter, itemPrefilter } from "../utils/hn";
 import { TagFilterDrawer } from "./TagFilterBar";
 import { AppConfig } from "../utils/config";
 import { JobStatistics } from "./JobStatistics";
@@ -161,12 +161,16 @@ const FilterableJobList = ({
   };
 
   console.debug("ItemList: ", items);
-  const filteredItems = items !== undefined ? itemFilter(
+  const cleansedItems = items !== undefined ? itemPrefilter(
     items,
-    flatActive,
-    searchFilter,
     parentItemId,
     userId
+  ) : undefined;
+
+  const filteredItems = cleansedItems !== undefined ? itemFilter(
+    cleansedItems,
+    flatActive,
+    searchFilter,
   ) : undefined;
 
   console.debug("FilteredItemList: ", filteredItems);
@@ -200,7 +204,7 @@ const FilterableJobList = ({
           onSearch={(needle: string | undefined) => setSearchFilter(needle)}
         />
         <JobStatistics
-          allItems={items ?? []}
+          allItems={cleansedItems ?? []}
           items={filteredItems ?? []}
           activeFilters={flatActive}
         />

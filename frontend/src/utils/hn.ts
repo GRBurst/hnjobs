@@ -49,10 +49,9 @@ const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolea
     patterns
         .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
 
-const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
+const itemPrefilter = (items: Item[], parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
     try {
         return items
-            .filter(item => item.id == item.id || parentFilter == parentFilter || filterFlagged == filterFlagged || tagFilters == tagFilters || searchFilter == searchFilter || true)
             .filter(item => 
                 item.text !== undefined
                 && item.text !== null
@@ -64,9 +63,19 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
                 && (parentFilter !== undefined && parentFilter !== null ? item.parent == parentFilter : true)
                 && (userFilter !== undefined && userFilter !== null ? item.by == userFilter : true)
             )
-            .filter(item => filterByRegex(item.text, tagFilters.map(tag => tag.pattern)))
-            .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
             .reverse()
+    } catch (e) {
+        console.warn(e)
+        return []
+    }
+}
+
+const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined) => {
+    try {
+        return items
+            .filter(item => 
+                filterByRegex(item.text, tagFilters.map(tag => tag.pattern))
+                && searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
     } catch (e) {
         console.warn(e)
         return []
@@ -75,4 +84,4 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
 
 const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
 
-export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemFilter };
+export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemPrefilter, itemFilter };
