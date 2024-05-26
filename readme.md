@@ -38,8 +38,8 @@ Online at https://grburst.github.io/hnjobs
 - [Effect-TS/effect](https://github.com/Effect-TS/effect) for async calls and effect management
 - [Reactfire](https://github.com/FirebaseExtended/reactfire/blob/main/docs/quickstart.md) for Realtime Database connection to Hackernews Firabase
 - [sqlite-wasm-http](https://github.com/mmomtchev/sqlite-wasm-http#readme) for partial requests to static served sqlite3 db (not online yet)
-- [ant design](https://github.com/ant-design/ant-design) as components framework.
-- [Reaviz](https://github.com/reaviz/reaviz) for Venn Diagrams.
+- [ant design](https://github.com/ant-design/ant-design) as components framework
+- [Reaviz](https://github.com/reaviz/reaviz) for Venn Diagrams
 
 ## Setup
 
