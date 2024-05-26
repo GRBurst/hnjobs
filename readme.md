@@ -2,7 +2,9 @@
 
 Online at https://grburst.github.io/hnjobs
 
-![mobile startpage light mode](https://github.com/grburst/hnjobs/blob/main/doc/assets/screenshots/mobile_startpage_lm.png.jpg?raw=true)
+<p float="left">
+<img alt="mobile startpage light mode" src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_startpage_lm.png?raw=true" width="150px"/>
+</p>
 
 
 ## Technologies + Frameworks
