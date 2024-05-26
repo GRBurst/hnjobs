@@ -75,7 +75,7 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
         return items
             .filter(item => 
                 filterByRegex(item.text, tagFilters.map(tag => tag.pattern))
-                && searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
+                && (searchFilter !== undefined ? item.text?.includes(searchFilter) : true))
     } catch (e) {
         console.warn(e)
         return []
