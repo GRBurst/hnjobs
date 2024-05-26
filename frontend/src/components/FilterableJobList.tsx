@@ -1,6 +1,6 @@
 import { HashSet } from "effect";
 import { useState } from "react";
-import { Flex, List } from "antd";
+import { List } from "antd";
 import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
