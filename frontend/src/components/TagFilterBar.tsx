@@ -45,8 +45,9 @@ interface TagFilterProps {
     onTagAdd: (key: string, tag: TagF) => void
     onTagRemove: (key: string, tag: TagF) => void
     onSearch: (needle: string | undefined) => void
+    visualizer: React.ReactNode | undefined
 }
-const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onTagRemove, onSearch }: TagFilterProps) => {
+const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, onTagRemove, onSearch, visualizer }: TagFilterProps) => {
     const [open, setOpen] = useState(false);
     const appContext = useContext(ConfigContext)
     const flatActive = flatFilters(activeTags)
@@ -99,13 +100,16 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
     ]
 
     return (<>
-        <div className="filter-bar">
-            <Flex gap={12}>
-                <h3>Active Filters</h3>
-                <EditFilled onClick={() => setOpen(true)} style={{ color: appContext.theme?.token?.colorPrimary }} />
-            </Flex>
-            {activeFiltersDisplay}
-        </div>
+        <Flex justify={open ? "flex-start" : "space-between"}>
+            <div className="filter-bar">
+                <Flex gap={12}>
+                    <h3 className="filters">Active Filters</h3>
+                    <EditFilled onClick={() => setOpen(true)} style={{ color: appContext.theme?.token?.colorPrimary }} />
+                </Flex>
+                {activeFiltersDisplay}
+            </div>
+            {visualizer ?? <></>}
+        </Flex>
         <Drawer title="Filters" size="large" onClose={() => setOpen(false)} open={open}>
             {activeFiltersDisplay}
             <div className="filter-bar">
