@@ -37,6 +37,10 @@ h3.filter {
   margin: 0;
 }
 
+.filter-area {
+  width: 100%;
+}
+
 .filter-bar {
   padding: 12px 0;
   min-width: 160px;

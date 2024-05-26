@@ -100,10 +100,10 @@ const TagFilterDrawer = ({ allTags, activeTags, onActive, onInactive, onTagAdd, 
     ]
 
     return (<>
-        <Flex justify={open ? "flex-start" : "space-between"}>
+        <Flex className="filter-area" justify={open ? "flex-start" : "space-between"}>
             <div className="filter-bar">
                 <Flex gap={12}>
-                    <h3 className="filters">Active Filters</h3>
+                    <h3 className="filter">Active Filters</h3>
                     <EditFilled onClick={() => setOpen(true)} style={{ color: appContext.theme?.token?.colorPrimary }} />
                 </Flex>
                 {activeFiltersDisplay}

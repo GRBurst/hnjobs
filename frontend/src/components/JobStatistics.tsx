@@ -40,7 +40,7 @@ export const JobStatistics = ({ allItems, items, activeFilters }: JobStatisticsP
         <VennDiagram
             data={series}
             height={200}
-            width={400}
+            width={300}
             series={<VennSeries colorScheme="dark2" />}
         />
     );
