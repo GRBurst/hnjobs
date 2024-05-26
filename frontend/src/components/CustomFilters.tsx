@@ -61,7 +61,7 @@ interface SearchFilterProps {
 const SearchFilter = ({ onTextSearch }: SearchFilterProps) => {
     const { Search } = Input;
     const onSearchInput: SearchProps['onSearch'] = (value) => {
-        if (value.length >= 3) {
+        if (value.length > 0) {
             onTextSearch(value)
         } else if (value.length == 0) {
             onTextSearch(undefined)
@@ -73,7 +73,7 @@ const SearchFilter = ({ onTextSearch }: SearchFilterProps) => {
             placeholder="case-sensitve input search text"
             allowClear
             onSearch={onSearchInput}
-            onChange={(e) => { if (e.target.value.length >= 3) { onTextSearch(e.target.value) } }}
+            onChange={(e) => { (e.target.value.length >= 3) ? onTextSearch(e.target.value) : onTextSearch(undefined) }}
             enterButton
         />
     )
@@ -87,7 +87,7 @@ const CustomFilters = ({ onTagAdd, onSearch }: CustomFiltersProps) => {
 
     return (
         <Flex gap="middle" vertical>
-            <p>Only simple regex without subgroup matching are supported. Including subgroups "(...)" might result in unexpected highlight behavior.</p>
+            <p>Only simple regex without subgroup matching are supported. Including subgroups "(...)" might result in unexpected highlight behavior. Full-text search is only applied on change for 3+ characters, or when the search button is pressed.</p>
             <CustomTagFilter onTagAdd={onTagAdd} />
             <SearchFilter onTextSearch={onSearch} />
         </Flex>
