@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button, Flex, Input, Space } from "antd"
 import type { SearchProps } from "antd/es/input/Search"
 
-import { TagFilter, TagFilterSimple } from "../models/TagFilter"
+import { TagFilter, TagFilterDefault } from "../models/TagFilter"
 import { AppConfig } from '../utils/config'
 
 interface CustomTagFilterProps {
@@ -17,7 +17,7 @@ const CustomTagFilter = ({ onTagAdd }: CustomTagFilterProps) => {
     const addNewTag = () => {
         if (tagName !== undefined && tagName != "") {
             const newFlags = (tagPatternFlags !== undefined && tagPatternFlags != "") ? tagPattern : "gmi"
-            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(`(${tagPattern})`, newFlags) }) : TagFilterSimple(tagName)
+            const newTag = (tagPattern !== undefined && tagPattern != "") ? TagFilter({ name: tagName, pattern: RegExp(`(${tagPattern})`, newFlags) }) : TagFilterDefault(tagName)
             onTagAdd(AppConfig.tagFilters.custom.sectionName, newTag)
             setTagName("")
             setTagPattern("")

@@ -4,7 +4,7 @@ import { List } from "antd";
 import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
-import { TagFilter, TagFilters, tagFilterToString } from "../models/TagFilter";
+import { TagFilter, TagFilterSimple, TagFilters, tagFilterToString } from "../models/TagFilter";
 import { filterByRegexAny, flatFilters, itemFilter, itemPrefilter } from "../utils/hn";
 import { TagFilterDrawer } from "./TagFilterBar";
 import { AppConfig } from "../utils/config";
@@ -62,7 +62,7 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
         searchFilter !== undefined
           ? [
             ...tagFilters,
-            TagFilter({ name: "_Search_", pattern: RegExp(searchFilter) }),
+            TagFilterSimple("_Search_", searchFilter),
           ]
           : tagFilters
       );
