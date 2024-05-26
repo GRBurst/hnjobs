@@ -45,15 +45,11 @@ const filterByRegexAny = (haystack: string | undefined, patterns: RegExp[]): boo
     patterns
         .reduce<boolean>((acc, pattern) => acc || (haystack !== undefined && haystack.search(pattern) > -1), false)
 
-const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolean => {
-    console.debug("haystack: ", haystack)
-    console.debug("patterns: ", patterns)
-    return patterns
+const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolean => 
+    patterns
         .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
-}
 
 const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined, parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
-    console.debug("items: ", items)
     try {
         return items
             .filter(item => item.id == item.id || parentFilter == parentFilter || filterFlagged == filterFlagged || tagFilters == tagFilters || searchFilter == searchFilter || true)
@@ -72,7 +68,7 @@ const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string
             .filter(item => searchFilter !== undefined ? item.text?.includes(searchFilter) : true)
             .reverse()
     } catch (e) {
-        console.debug(e)
+        console.warn(e)
         return []
     }
 }

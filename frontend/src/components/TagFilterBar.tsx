@@ -22,6 +22,7 @@ interface TagProps {
 
 function TagButton({ tagFilter, filterKey, isActive, onActiveChange, deletable, onTagRemove }: TagProps): ReactNode {
     return <Tag
+        className="filter-tag"
         color={isActive ? AppConfig.colors.primary : "default"}
         closable={deletable}
         onClick={() => onActiveChange(filterKey, tagFilter)}

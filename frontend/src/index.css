@@ -39,11 +39,20 @@ h3.filter {
 
 .filter-bar {
   padding: 12px 0;
+  min-width: 160px;
 }
 
 .filter-list {
   min-height: 22px;
   display: flex;
+}
+
+.filter-tag {
+  cursor: pointer;
+}
+
+h3.list-header {
+  margin: 0;
 }
 
 .github-icon {

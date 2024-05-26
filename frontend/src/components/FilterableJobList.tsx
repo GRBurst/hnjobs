@@ -1,6 +1,6 @@
 import { HashSet } from "effect";
 import { useState } from "react";
-import { List } from "antd";
+import { Flex, List } from "antd";
 import sanitizeHtml from "sanitize-html";
 
 import { Item } from "../models/Item";
@@ -29,9 +29,6 @@ const getHighlightedText = (
   const patterns = sorted.map((p) => p.pattern.source).join("|");
   const parts = text.split(RegExp(patterns, "gim"));
 
-  console.debug(patterns);
-  console.debug(parts);
-
   // Not very efficient but good enough for now
   const highlightedText = parts
     .map((textWord) =>
@@ -54,6 +51,7 @@ interface ItemListProps {
 }
 const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => (
   <List
+    header={<h3 className="list-header">{items?.length ?? 0} Job Offers</h3>}
     loading={items === undefined || !Array.isArray(items)}
     className="job-list"
     itemLayout="horizontal"
@@ -175,36 +173,38 @@ const FilterableJobList = ({
 
   return (
     <>
-      <TagFilterDrawer
-        allTags={allTagFilters}
-        activeTags={filterIntersection(allTagFilters, activeTagFilters)}
-        onActive={(key: string, tag: TagFilter) =>
-          addFilters(key, tag, activeTagFilters, setActiveTagFilters)
-        }
-        onInactive={(key: string, tag: TagFilter) =>
-          removeFilters(key, tag, activeTagFilters, setActiveTagFilters)
-        }
-        onTagAdd={(key: string, tag: TagFilter) => {
-          addFilters(key, tag, allTagFilters, setAllTagFilters)
-          localStorage.setItem(
-            AppConfig.tagFilters.custom.localStorageKey,
-            JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
-          )
-        }}
-        onTagRemove={(key: string, tag: TagFilter) => {
-          removeFilters(key, tag, allTagFilters, setAllTagFilters)
-          localStorage.setItem(
-            AppConfig.tagFilters.custom.localStorageKey,
-            JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
-          )
-        }}
-        onSearch={(needle: string | undefined) => setSearchFilter(needle)}
-      />
-      <JobStatistics
-        allItems={items ?? []}
-        items={filteredItems ?? []}
-        activeFilters={flatActive}
-      />
+      <Flex>
+        <TagFilterDrawer
+          allTags={allTagFilters}
+          activeTags={filterIntersection(allTagFilters, activeTagFilters)}
+          onActive={(key: string, tag: TagFilter) =>
+            addFilters(key, tag, activeTagFilters, setActiveTagFilters)
+          }
+          onInactive={(key: string, tag: TagFilter) =>
+            removeFilters(key, tag, activeTagFilters, setActiveTagFilters)
+          }
+          onTagAdd={(key: string, tag: TagFilter) => {
+            addFilters(key, tag, allTagFilters, setAllTagFilters)
+            localStorage.setItem(
+              AppConfig.tagFilters.custom.localStorageKey,
+              JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
+            )
+          }}
+          onTagRemove={(key: string, tag: TagFilter) => {
+            removeFilters(key, tag, allTagFilters, setAllTagFilters)
+            localStorage.setItem(
+              AppConfig.tagFilters.custom.localStorageKey,
+              JSON.stringify(Array.from(allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []).map(f => tagFilterToString(f)))
+            )
+          }}
+          onSearch={(needle: string | undefined) => setSearchFilter(needle)}
+        />
+        <JobStatistics
+          allItems={items ?? []}
+          items={filteredItems ?? []}
+          activeFilters={flatActive}
+        />
+      </Flex>
       <ItemList
         items={filteredItems}
         tagFilters={flatActive}
