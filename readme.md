@@ -2,8 +2,30 @@
 
 Online at https://grburst.github.io/hnjobs
 
+## Desktop Screenshots
+
 <p float="left">
-<img alt="mobile startpage light mode" src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_startpage_lm.png?raw=true" width="150px"/>
+<img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-startpage_dm.png?raw=true" alt="startpage dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-startpage_lm.png?raw=true" alt="startpage light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-3_active_filters_dm.png?raw=true" alt="3 active filters in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-3_active_filters_lm.png?raw=true" alt="3 active filters in light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-custom_filters_dm.png?raw=true" alt="custom filters in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-custom_filters_lm.png?raw=true" alt="custom filters in light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-single_filter_dm.png?raw=true" alt="single filter active in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-single_filter_lm.png?raw=true" alt="single filter active in light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-3_active_filters_startpage_dm.png?raw=true" alt="3 active filters startpage view in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/HackerNews_Jobs-grburst.github.io-3_active_filters_startpage_lm.png?raw=true" alt="3 active filters startpage view in light mode" width="150px" />
+</p>
+
+## Mobile Screenshots
+
+<p float="left">
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_3filters_dm.png?raw=true" alt="mobile 3 filters active in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_3filters_lm.png?raw=true" alt="mobile 3 filters active in light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_3filters-startpage_dm.png?raw=true" alt="mobile 3 filters startpage view in dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_3filters-startpage_lm.png?raw=true" alt="mobile 3 filters startpage view in light mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_startpage_dm.png?raw=true" alt="mobile startpage dark mode" width="150px" />
+ <img src="https://github.com/grburst/hnjobs/blob/update-readme/doc/assets/screenshots/mobile_startpage_lm.png?raw=true" alt="mobile startpage light mode" width="150px" />
 </p>
 
 
