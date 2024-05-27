@@ -20,7 +20,7 @@ export const technologies = HashSet.fromIterable([
     TagFilterDefault("Angular"),
     TagFilterDefault("VueJS"),
     TagFilterDefault("PHP"),
-    TagFilterDefault(".NET"),
+    TagFilter({name: ".NET", pattern: RegExp(/(^|\b|\s)(\.NET)($|\b|\s|^\+|^#)/, "gm")}),
     TagFilterDefault("C#"),
     TagFilterDefault("Kotlin"),
     TagFilter({name: "Scala", pattern: RegExp(/(^|\b|\s)(Scala[0-9]{0,1})($|\b|\s)/, "gmi")}),
