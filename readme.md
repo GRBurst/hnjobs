@@ -50,7 +50,7 @@ Allow `direnv` to automatically run the `.envrc`.
 direnv allow
 ```
 
-When `direnv` finished setting up the environment using devbox, simply run `yarn` from the `frondend` folder to install all dependencies:
+When `direnv` finished setting up the environment using devbox, simply run `yarn` from the `frontend` folder to install all dependencies:
 ```bash
 yarn install
 ```
