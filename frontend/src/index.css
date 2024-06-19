@@ -77,9 +77,39 @@ h3.list-header {
   background-color: #f609;
 }
 
+.slider-width-container {
+  display: none;
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.slider-width {
+  width: 20em;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     color: #fff;
     background: #141414;
   }
+}
+
+@media (min-width:320px)  { /* smartphones, iPhone, portrait 480x320 phones */
+  .design-button {
+    display: none;
+  }
+}
+@media (min-width:481px)  { /* portrait e-readers (Nook/Kindle), smaller tablets @ 600 or @ 640 wide. */
+}
+@media (min-width:641px)  { /* portrait tablets, portrait iPad, landscape e-readers, landscape 800x480 or 854x480 phones */
+  .design-button {
+    display: block;
+  }
+}
+@media (min-width:961px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */
+}
+@media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */
+}
+@media (min-width:1281px) { /* hi-res laptops and desktops */
 }

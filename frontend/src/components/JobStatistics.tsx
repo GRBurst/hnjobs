@@ -38,9 +38,10 @@ export const JobStatistics = ({ allItems, items, activeFilters }: JobStatisticsP
     if (allItems.length == 0 || activeFilters.length == 0 || series.length == 0) return <></>
     return (
         <VennDiagram
+            type="venn"
             data={series}
-            height={200}
-            width={300}
+            height={300}
+            width={400}
             series={<VennSeries colorScheme="dark2" />}
         />
     );
