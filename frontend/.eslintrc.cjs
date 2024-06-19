@@ -14,5 +14,12 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'react/require-default-props': [
+      'error',
+      {
+        forbidDefaultForRequired: true,
+        ignoreFunctionalComponents: true,
+      },
+    ],
   },
 }
