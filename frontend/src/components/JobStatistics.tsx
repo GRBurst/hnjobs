@@ -1,4 +1,4 @@
-import { VennDiagram, VennSeries } from 'reaviz';
+import { VennDiagram, VennSeries, IVennLayout, VennLabel } from 'reaviz';
 
 import { Item } from "../models/Item";
 import { TagFilter } from "../models/TagFilter";
@@ -46,3 +46,22 @@ export const JobStatistics = ({ allItems, items, activeFilters }: JobStatisticsP
         />
     );
 }
+
+// <VennDiagram
+//     type="venn"
+//     data={series}
+//     height={300}
+//     width={400}
+//     series={
+//         <VennSeries
+//             colorScheme="dark2"
+//             outerLabel={<VennLabel format={(data) => { console.log("labelData: ", data); return "foo" }} />}
+//         />
+//     }
+// //series={<VennSeries colorScheme="dark2" label={<VennLabel labelType="key" format={(data) => { return Math.sqrt(data.size) }} />} />} // data.map(value => ({"key": value.key, "data": Math.sqrt(value.data) }))
+// // series={<VennSeries colorScheme="dark2" label={<VennLabel labelType="key" />} />} // data.map(value => ({"key": value.key, "data": Math.sqrt(value.data) }))
+// // series={<VennSeries colorScheme="dark2" label={<VennLabel labelType="key" />} />} // data.map(value => ({"key": value.key, "data": Math.sqrt(value.data) }))
+// // series={<VennSeries colorScheme="dark2" label={<VennLabel labelType="value" format={(data) => { console.log("data", data); return Math.sqrt(data.size) }} />} />} // data.map(value => ({"key": value.key, "data": Math.sqrt(value.data) }))
+// // series={<VennSeries colorScheme="dark2" data={series.map(value => ({ "key": value.key, "data": Math.sqrt(value.data) }))} />}
+// // series={<VennSeries colorScheme="dark2" />}
+//  />
