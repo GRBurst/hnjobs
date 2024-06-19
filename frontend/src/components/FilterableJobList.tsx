@@ -1,7 +1,6 @@
 import { Flex, FloatButton, List, Slider } from "antd";
-import { ConfigContext } from "antd/es/config-provider";
 import { HashSet } from "effect";
-import { CSSProperties, useContext, useState } from "react";
+import { CSSProperties, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { DesignPaletteIcon } from "./Icons";
 
@@ -63,7 +62,6 @@ interface ItemListProps {
 }
 const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => {
   const [showSlider, setShowSlider] = useState<boolean>(false);
-  const appContext = useContext(ConfigContext);
   const displayStyle: CSSProperties = {
     display: showSlider ? "block" : "none",
   };
@@ -73,12 +71,7 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => {
       onClick={() => setShowSlider(!showSlider)}
       tooltip={<div>Edit Design</div>}
       icon={<DesignPaletteIcon />}
-      style={{
-        color: showSlider
-          ? appContext.theme?.token?.colorPrimaryBg
-          : appContext.theme?.token?.colorPrimary,
-        bottom: "100px",
-      }}
+      type={showSlider ? "primary" : "default"}
     />
   );
   const slider = (
