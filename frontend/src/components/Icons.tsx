@@ -1,8 +1,13 @@
 import React from "react";
 import Icon from '@ant-design/icons';
 
+// import {lazy} from "react";
+
+// const GithubUrlLightMode = lazy(() => import("../../assets/github-mark.svg"));
+// const GithubUrlDarkMode = lazy(() => import("../../assets/github-mark-white.svg"));
 import GithubUrlLightMode from "../../assets/github-mark.svg";
 import GithubUrlDarkMode from "../../assets/github-mark-white.svg";
+// import DesignPaletteSvg from "../../assets/design-palette.svg";
 
 import type { GetProps } from 'antd';
 

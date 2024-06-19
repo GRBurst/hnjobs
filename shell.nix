@@ -9,6 +9,7 @@ let
     redhat.vscode-yaml
     dbaeumer.vscode-eslint
     esbenp.prettier-vscode
+    betterthantomorrow.calva
   ]) ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
     {
       publisher = "42Crunch";
