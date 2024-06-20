@@ -18,8 +18,6 @@ import { TagFilters } from "../models/TagFilter";
 import { getItemsFromIds } from "../utils/hn";
 
 const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
-const WhoWantsHired = lazy(() => import("./WhoWantsHired"));
-const WhoFreelancer = lazy(() => import("./WhoFreelancer"));
 
 const getLastThreads = (
   askDbRef: DatabaseReference,
@@ -132,9 +130,7 @@ export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
   const tabItems = foundCategories.map((category) => ({
     key: category.id.toString(),
     label: category.phrase,
-    children: [
-      <WhoWantsHired filterTags={filterTags} jobCategory={category} />,
-    ],
+    children: [<WhoIsHiring filterTags={filterTags} jobCategory={category} />],
   }));
 
   if (!foundCategories) return <></>;
