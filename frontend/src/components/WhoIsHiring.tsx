@@ -19,14 +19,10 @@ export const WhoIsHiring = ({ filterTags }: WhoIsHiringProps) => {
     undefined
   );
   const whoishiring = "whoishiring";
-  // Ask HN: Freelancer? Seeking freelancer?
-  // Ask HN: Who wants to be hired?
-  // Ask HN: Who is hiring?
-
   const userRef = `v0/user/${whoishiring}`;
 
   const db = useDatabase();
-  const dbRef = ref(useDatabase());
+  const dbRef = ref(db);
   const endpointRef = ref(db, userRef);
 
   // Status observable

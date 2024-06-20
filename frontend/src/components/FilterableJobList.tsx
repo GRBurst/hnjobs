@@ -17,7 +17,7 @@ import {
   flatFilters,
   itemFilter,
   itemPrefilter,
-} from "../utils/hn";
+} from "../utils/filters";
 import { JobStatistics } from "./JobStatistics";
 import { TagFilterDrawer } from "./TagFilterBar";
 
