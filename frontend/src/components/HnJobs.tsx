@@ -3,10 +3,7 @@ import type { HashSet } from "effect/HashSet";
 
 import { lazy, useEffect, useState } from "react";
 
-import { getDatabase } from "firebase/database";
-import { DatabaseProvider, useFirebaseApp } from "reactfire";
-
-import { App, ConfigProvider, Tabs, theme } from "antd";
+import { App, ConfigProvider, theme } from "antd";
 
 import { TagFilter, tagFilterFromString } from "../models/TagFilter";
 import { GithubIcon } from "./Icons";
@@ -16,14 +13,14 @@ import { locations, misc, role, technologies } from "../utils/predefined";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
-const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
+const WhoIsData = lazy(() => import("./WhoIsLiveDataList"));
 
 const HnJobs = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
-  const app = useFirebaseApp();
-  const database = getDatabase(app);
+  // const app = useFirebaseApp();
+  // const database = getDatabase(app);
 
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
   predefinedFilterTags.set("Technologies", technologies);
@@ -31,9 +28,7 @@ const HnJobs = () => {
   predefinedFilterTags.set("Role", role);
   predefinedFilterTags.set("Misc", misc);
 
-  const listDataSource = import.meta.env.VITE_DATA_SOURCE;
-
-  const getWhoIsHiringList = (source: string): JSX.Element => {
+  const getList = (source: string): JSX.Element => {
     if (source == "local") {
       console.debug("Getting jobs from static json file.");
       return <FilterableLocalList filterTags={predefinedFilterTags} />;
@@ -42,39 +37,9 @@ const HnJobs = () => {
       return <FilterableSqliteList filterTags={predefinedFilterTags} />;
     } else {
       console.debug("Getting jobs live from hackernews.");
-      return (
-        <DatabaseProvider sdk={database}>
-          <WhoIsHiring filterTags={predefinedFilterTags} />;
-        </DatabaseProvider>
-      );
+      return <WhoIsData filterTags={predefinedFilterTags} />;
     }
   };
-
-  const getWhoWantsToBeHiredList = (source: string): JSX.Element => {
-    if (source == "local") {
-      console.debug("Getting jobs from static json file.");
-      return <></>;
-    } else if (source == "sqlite") {
-      console.debug("Getting jobs from static sqlite db.");
-      return <></>;
-    } else {
-      console.debug("Getting jobs live from hackernews.");
-      return (
-        <DatabaseProvider sdk={database}>
-          <WhoIsHiring filterTags={predefinedFilterTags} />;
-        </DatabaseProvider>
-      );
-    }
-  };
-
-  const whoIsHiringTab = (source: string) => ({
-    key: "whoishiring",
-    label: "Who Is Hiring?",
-    children: [{ getWhoIsHiringList(source) }],
-  });
-  
-  const HnJobsTabs = 
-    <Tabs tabPosition="left" items={[whoIsHiringTab(listDataSource)]} />
 
   useEffect(() => {
     // Set mode to value during mount
@@ -117,18 +82,14 @@ const HnJobs = () => {
         theme={{
           token: {
             colorPrimary: AppConfig.colors.primary,
-            // colorBgBase: "#f6f6ef", // #828282 ?
-            // colorPrimaryBg: "#f6f6ef",
-            // colorPrimaryBg: "#f6f6ef",
-            // colorBgBase: "#f6f6ef", // #828282 ?
           },
           algorithm: isDarkMode ? darkAlgorithm : defaultAlgorithm,
         }}
       >
         <App>
           <h1 className="hntitle">HackerNews Jobs 🚀</h1>
-          {HnJobsTabs}
-          {/* <HnJobsTabs /> */}
+          {/* {getList(import.meta.env.VITE_DATA_SOURCE)} */}
+          <WhoIsData filterTags={predefinedFilterTags} />;
           <GithubIcon
             url="https://grburst.github.io/hnjobs"
             darkMode={isDarkMode}
