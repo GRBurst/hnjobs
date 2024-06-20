@@ -19,9 +19,6 @@ const HnJobs = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
-  // const app = useFirebaseApp();
-  // const database = getDatabase(app);
-
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
   predefinedFilterTags.set("Technologies", technologies);
   predefinedFilterTags.set("Locations", locations);

@@ -1,53 +1,149 @@
-import { TagFilters } from "../models/TagFilter";
+import { Schema } from "@effect/schema";
+import { ParseError } from "@effect/schema/ParseResult";
+import { Effect, Either, Option, pipe } from "effect";
 
-import { getDatabase } from "firebase/database";
-import { lazy } from "react";
-import { DatabaseProvider, useFirebaseApp } from "reactfire";
+import { DatabaseReference, getDatabase, ref } from "firebase/database";
+import { lazy, useMemo, useState } from "react";
+import {
+  DatabaseProvider,
+  useDatabaseObjectData,
+  useFirebaseApp,
+} from "reactfire";
 
 import { Tabs } from "antd";
+
+import { HnJobCategory, HnJobs } from "../models/HnJobs";
+import { Item, User } from "../models/Item";
+import { TagFilters } from "../models/TagFilter";
+import { getItemsFromIds } from "../utils/hn";
 
 const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
 const WhoWantsHired = lazy(() => import("./WhoWantsHired"));
 const WhoFreelancer = lazy(() => import("./WhoFreelancer"));
 
+const getLastThreads = (
+  askDbRef: DatabaseReference,
+  user: User
+): Effect.Effect<Either.Either<Item, ParseError>[], Error> =>
+  pipe(
+    getItemsFromIds(
+      askDbRef,
+      user.submitted?.slice(0, 3) ?? [],
+      (n: number) => n
+    ),
+    Effect.tap(([whoIsHiring, freelancer, whoWantsHiring]) => {
+      console.log(whoIsHiring.title);
+      console.log(freelancer.title);
+      console.log(whoWantsHiring.title);
+    }),
+    Effect.map((asks) =>
+      asks.map((ask) => Schema.decodeUnknownEither(Item)(ask))
+    )
+  );
+
+// Ask HN: Who is hiring?
+// Ask HN: Who wants to be hired?
+// Ask HN: Freelancer? Seeking freelancer?
+const mapToCategories = (threads: Item[]): HnJobs => {
+  const whoIsHiring: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Who is hiring?")
+  );
+  const whoWantsHired: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Who wants to be hired?")
+  );
+  const whoFreelancer: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Freelancer? Seeking freelancer?")
+  );
+  return HnJobs({
+    whoIsHiring: whoIsHiring
+      ? Option.some(
+          HnJobCategory({
+            id: whoIsHiring.id,
+            label: "whoishiring",
+            phrase: "Who is hiring?",
+            thread: whoIsHiring,
+          })
+        )
+      : Option.none(),
+    whoWantsHired: whoWantsHired
+      ? Option.some(
+          HnJobCategory({
+            id: whoWantsHired.id,
+            label: "whowantshired",
+            phrase: "Who wants to be hired?",
+            thread: whoWantsHired,
+          })
+        )
+      : Option.none(),
+    whoFreelancer: whoFreelancer
+      ? Option.some(
+          HnJobCategory({
+            id: whoFreelancer.id,
+            label: "whofreelancer",
+            phrase: "Freelancer? Seeking freelancer?",
+            thread: whoFreelancer,
+          })
+        )
+      : Option.none(),
+  });
+};
+
 export interface WhoIsDataProps {
   filterTags: Map<string, TagFilters>;
 }
 export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
+  const [threads, setThreads] = useState<HnJobs | undefined>(undefined);
+
+  const whoishiring = "whoishiring";
+  const userRef = `v0/user/${whoishiring}`;
+
   const app = useFirebaseApp();
-  const database = getDatabase(app);
+  const db = getDatabase(app);
+  const dbRef = ref(db);
+  const userEndpointRef = ref(db, userRef);
 
-  // <DatabaseProvider sdk={database}>
-  //   <WhoIsHiring filterTags={filterTags} />;
-  // </DatabaseProvider>
+  // Status observable
+  const { status: endpointStatus, data: userData } =
+    useDatabaseObjectData<User>(userEndpointRef);
 
-  const whoIsHiringTab = {
-    key: "whoishiring",
-    label: "Who is hiring?",
-    children: [<WhoIsHiring filterTags={filterTags} />],
-  };
-  // const whoWantsHiredTab = {
-  //   key: "whowantshired",
-  //   label: "Who wants to be hired?",
-  //   children: [<WhoWantsHired filterTags={filterTags} />],
-  // };
-  // const whoFreelancerTab = {
-  //   key: "whofreelancer",
-  //   label: "Who wants to be hired?",
-  //   children: [<WhoFreelancer filterTags={filterTags} />],
-  // };
+  useMemo(() => {
+    if (endpointStatus == "success") {
+      Effect.runPromise(getLastThreads(dbRef, userData)).then((threads) => {
+        const foundCategories: Item[] = threads.flatMap((threadE) => {
+          if (Either.isRight(threadE)) {
+            return [threadE.right];
+          } else {
+            console.log("Not all job categories found: ", threadE.left);
+            return [];
+          }
+        });
+        setThreads(mapToCategories(foundCategories));
+      });
+    }
+  }, [dbRef, endpointStatus, userData]);
 
-  const tabItems = [whoIsHiringTab];
+  if (!threads) return <></>;
 
-  const HnJobsTabs = <Tabs tabPosition="left" items={tabItems} />;
+  const foundCategories: HnJobCategory[] = Object.values(threads)
+    .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
+    .map((c: Option.Some<HnJobCategory>) => c.value);
+
+  console.log("Found categories: ", foundCategories);
+  const tabItems = foundCategories.map((category) => ({
+    key: category.id.toString(),
+    label: category.phrase,
+    children: [
+      <WhoWantsHired filterTags={filterTags} jobCategory={category} />,
+    ],
+  }));
+
+  if (!foundCategories) return <></>;
 
   return (
-    <DatabaseProvider sdk={database}>
+    <DatabaseProvider sdk={db}>
       <Tabs tabPosition="left" items={tabItems} />
     </DatabaseProvider>
   );
-
-  HnJobsTabs;
 };
 
 export default WhoIsData;

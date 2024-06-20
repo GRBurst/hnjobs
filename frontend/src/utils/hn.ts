@@ -1,14 +1,13 @@
 // @ts-expect-error: QueryChange is not exported correctly from rxfire/database
 import { QueryChange } from "rxfire/database";
 
-import { Effect, Either, pipe } from "effect";
+import { Data, Effect, Either, pipe } from "effect";
 
 import { DataSnapshot, DatabaseReference, child, get } from "firebase/database";
 
 import { Schema } from "@effect/schema";
 import { ParseError } from "@effect/schema/ParseResult";
 import { Item } from "../models/Item";
-import { TagFilter, TagFilters } from "../models/TagFilter";
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
@@ -46,47 +45,52 @@ const getKidItemsFromIds = (dbRef: DatabaseReference, kidsArray: number[][]) => 
         kidsArray.map(itemKids => getItemsFromIds(dbRef, itemKids, x => x))
     )
 
-const filterByRegexAny = (haystack: string | undefined, patterns: RegExp[]): boolean =>
-    patterns
-        .reduce<boolean>((acc, pattern) => acc || (haystack !== undefined && haystack.search(pattern) > -1), false)
+const getThreadComments = (
+    dbRef: DatabaseReference,
+    ask: Item
+): Effect.Effect<Item[], Error> =>
+    pipe(
+        Effect.succeed(ask),
+        Effect.map((ask) => ask.kids ?? []),
+        Effect.tap((askKids) => console.log("mapped kids", askKids)),
+        Effect.flatMap((itemKids) => getItemsFromIds(dbRef, itemKids, (i) => i))
+    );
 
-const filterByRegex = (haystack: string | undefined, patterns: RegExp[]): boolean => 
-    patterns
-        .reduce<boolean>((acc, pattern) => acc && (haystack !== undefined && haystack.search(pattern) > -1), true)
+const enrichDetachedFlag = (
+    dbRef: DatabaseReference,
+    comments: Item[]
+): Effect.Effect<Item[], Error> => {
+    const moderatorId = "dang";
+    const filterSubstring = "We detached this";
+    const Item = Data.case<Item>();
 
-const itemPrefilter = (items: Item[], parentFilter: number | undefined = undefined, userFilter: string | undefined = undefined, filterFlagged: boolean = true) => {
-    try {
-        return items
-            .filter(item => 
-                item.text !== undefined
-                && item.text !== null
-                && item.text != ""
-                && item.detached !== true
-                && !(filterFlagged && item.text?.toLowerCase().includes("[flagged]"))
-                && !(filterFlagged && item.text?.toLowerCase().includes("[dead]"))
-                && (filterFlagged && (item.dead !== undefined && item.dead !== null ? item.dead == false : true))
-                && (parentFilter !== undefined && parentFilter !== null ? item.parent == parentFilter : true)
-                && (userFilter !== undefined && userFilter !== null ? item.by == userFilter : true)
-            )
-            .reverse()
-    } catch (e) {
-        console.warn(e)
-        return []
-    }
-}
+    const program = Effect.gen(function* () {
+        const lookupMap = new Map();
 
-const itemFilter = (items: Item[], tagFilters: TagFilter[], searchFilter: string | undefined = undefined) => {
-    try {
-        return items
-            .filter(item => 
-                filterByRegex(item.text, tagFilters.map(tag => tag.pattern))
-                && (searchFilter !== undefined ? item.text?.includes(searchFilter) : true))
-    } catch (e) {
-        console.warn(e)
-        return []
-    }
-}
+        const commentsKids: number[] = comments.map((c) => c.kids ?? []).flat();
+        const commentsKidsItems = yield* getItemsFromIds(
+        dbRef,
+        commentsKids,
+        (c) => c
+        );
+        commentsKidsItems.forEach((c) => lookupMap.set(c.id, c));
 
-const flatFilters = (filters: Map<string, TagFilters>): TagFilter[] => Array.from(filters.values()).map(filterSet => Array.from(filterSet)).flat()
+        const enriched = comments.map((c) => {
+        const isDetached =
+            c.kids
+            ?.map((kid) => lookupMap.get(kid))
+            .some(
+                (k) => k.by === moderatorId && k.text?.includes(filterSubstring)
+            ) || false;
+        return Item({ ...c, ...{ detached: isDetached } });
+        });
 
-export { filterByRegex, filterByRegexAny, flatFilters, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, itemPrefilter, itemFilter };
+        return enriched;
+    });
+
+    return program;
+};
+
+
+export { enrichDetachedFlag, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, getThreadComments };
+
