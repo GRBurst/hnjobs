@@ -96,7 +96,7 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => {
       <List
         header={
           <Flex justify="space-between">
-            <h3 className="list-header">{items?.length ?? 0} Job Offers</h3>
+            <h3 className="list-header">{items?.length ?? 0} Jobs</h3>
           </Flex>
         }
         loading={items === undefined || !Array.isArray(items)}

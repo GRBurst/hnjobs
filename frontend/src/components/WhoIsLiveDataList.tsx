@@ -127,13 +127,13 @@ export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
     .map((c: Option.Some<HnJobCategory>) => c.value);
 
   console.log("Found categories: ", foundCategories);
+  if (!foundCategories) return <></>;
+
   const tabItems = foundCategories.map((category) => ({
     key: category.id.toString(),
     label: category.phrase,
     children: [<WhoIsHiring filterTags={filterTags} jobCategory={category} />],
   }));
-
-  if (!foundCategories) return <></>;
 
   return (
     <DatabaseProvider sdk={db}>
