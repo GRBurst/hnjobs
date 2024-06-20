@@ -85,8 +85,8 @@ const HnJobs = () => {
       >
         <App>
           <h1 className="hntitle">HackerNews Jobs 🚀</h1>
-          {/* {getList(import.meta.env.VITE_DATA_SOURCE)} */}
-          <WhoIsData filterTags={predefinedFilterTags} />;
+          {/* getList(import.meta.env.VITE_DATA_SOURCE) */}
+          <WhoIsData filterTags={predefinedFilterTags} />
           <GithubIcon
             url="https://grburst.github.io/hnjobs"
             darkMode={isDarkMode}
