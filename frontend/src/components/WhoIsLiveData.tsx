@@ -86,6 +86,7 @@ const mapToCategories = (threads: Item[]): HnJobs => {
   });
 };
 
+// const FilterContext = createContext<Map<string, TagFilters>>(new Map());
 export interface WhoIsDataProps {
   filterTags: Map<string, TagFilters>;
 }
@@ -137,7 +138,9 @@ export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
 
   return (
     <DatabaseProvider sdk={db}>
+      {/* <FilterContext.Provider value={filterTags}> */}
       <Tabs tabPosition="left" items={tabItems} />
+      {/* </FilterContext.Provider> */}
     </DatabaseProvider>
   );
 };

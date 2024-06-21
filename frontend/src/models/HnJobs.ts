@@ -1,11 +1,12 @@
-import { Data, Option } from "effect";
+import { Data, Effect, Option } from "effect";
 import { Item } from "./Item";
 
 export interface HnJobCategory {
     readonly id: number
     readonly label: string
     readonly phrase: string
-    readonly thread: Item
+    readonly thread: Option.Option<Item>
+    receiveThread: () => Effect.Effect<Item[], Error>
 }
 export const HnJobCategory = Data.case<HnJobCategory>()
 

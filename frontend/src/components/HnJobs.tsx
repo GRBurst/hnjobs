@@ -3,17 +3,20 @@ import type { HashSet } from "effect/HashSet";
 
 import { lazy, useEffect, useState } from "react";
 
-import { App, ConfigProvider, theme } from "antd";
+import { App, ConfigProvider, Layout, Menu, theme } from "antd";
 
 import { TagFilter, tagFilterFromString } from "../models/TagFilter";
 import { GithubIcon } from "./Icons";
 
+import { UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
 import { AppConfig } from "../utils/config";
 import { locations, misc, role, technologies } from "../utils/predefined";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
 const WhoIsData = lazy(() => import("./WhoIsLiveDataList"));
+
+const { Header, Sider, Content } = Layout;
 
 const HnJobs = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -84,13 +87,48 @@ const HnJobs = () => {
         }}
       >
         <App>
-          <h1 className="hntitle">HackerNews Jobs 🚀</h1>
-          {/* getList(import.meta.env.VITE_DATA_SOURCE) */}
-          <WhoIsData filterTags={predefinedFilterTags} />
-          <GithubIcon
-            url="https://grburst.github.io/hnjobs"
-            darkMode={isDarkMode}
-          />
+          <Layout>
+            <Header>
+              {/* <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              style={{
+                fontSize: '16px',
+                width: 64,
+                height: 64,
+              }}
+            /> */}
+              <h1 className="hntitle">HackerNews Jobs 🚀</h1>
+              <GithubIcon
+                url="https://grburst.github.io/hnjobs"
+                darkMode={isDarkMode}
+              />
+            </Header>
+          </Layout>
+          <Layout>
+            <Sider trigger={null} collapsible>
+              <Menu
+                items={[
+                  {
+                    key: "1",
+                    icon: <UserOutlined />,
+
+                    label: "nav 1",
+                  },
+                  {
+                    key: "2",
+                    icon: <VideoCameraOutlined />,
+                    label: "nav 2",
+                  },
+                ]}
+              ></Menu>
+            </Sider>
+            <Content>
+              {/* <WhoIsData filterTags={predefinedFilterTags} /> */}
+              {getList(import.meta.env.VITE_DATA_SOURCE)}
+            </Content>
+          </Layout>
         </App>
       </ConfigProvider>
     </>
