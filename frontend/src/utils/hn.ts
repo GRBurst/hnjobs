@@ -1,13 +1,14 @@
 // @ts-expect-error: QueryChange is not exported correctly from rxfire/database
 import { QueryChange } from "rxfire/database";
 
-import { Data, Effect, Either, pipe } from "effect";
+import { Data, Effect, Either, Option, pipe } from "effect";
 
 import { DataSnapshot, DatabaseReference, child, get } from "firebase/database";
 
 import { Schema } from "@effect/schema";
 import { ParseError } from "@effect/schema/ParseResult";
-import { Item } from "../models/Item";
+import { HnJobCategory, HnJobs } from "../models/HnJobs";
+import { Item, User } from "../models/Item";
 
 const getItemFromId = (dbRef: DatabaseReference, itemId: number): Effect.Effect<Item, Error> => {
 
@@ -91,6 +92,85 @@ const enrichDetachedFlag = (
     return program;
 };
 
+const getLastThreads = (
+  askDbRef: DatabaseReference,
+  user: User
+): Effect.Effect<Either.Either<Item, ParseError>[], Error> =>
+  pipe(
+    getItemsFromIds(
+      askDbRef,
+      user.submitted?.slice(0, 3) ?? [],
+      (n: number) => n
+    ),
+    Effect.tap(([whoIsHiring, freelancer, whoWantsHiring]) => {
+      console.log(whoIsHiring.title);
+      console.log(freelancer.title);
+      console.log(whoWantsHiring.title);
+    }),
+    Effect.map((asks) =>
+      asks.map((ask) => Schema.decodeUnknownEither(Item)(ask))
+    )
+  );
 
-export { enrichDetachedFlag, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, getThreadComments };
+const mapToCategories = (threads: Item[]): HnJobs => {
+  const whoIsHiring: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Who is hiring?")
+  );
+  const whoWantsHired: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Who wants to be hired?")
+  );
+  const whoFreelancer: Item | undefined = threads.find((thread) =>
+    thread.title?.includes("Ask HN: Freelancer? Seeking freelancer?")
+  );
+  return HnJobs({
+    whoIsHiring: whoIsHiring
+      ? Option.some(
+          HnJobCategory({
+            id: whoIsHiring.id,
+            label: "whoishiring",
+            phrase: "Who is hiring?",
+            thread: whoIsHiring,
+          })
+        )
+      : Option.none(),
+    whoWantsHired: whoWantsHired
+      ? Option.some(
+          HnJobCategory({
+            id: whoWantsHired.id,
+            label: "whowantshired",
+            phrase: "Who wants to be hired?",
+            thread: whoWantsHired,
+          })
+        )
+      : Option.none(),
+    whoFreelancer: whoFreelancer
+      ? Option.some(
+          HnJobCategory({
+            id: whoFreelancer.id,
+            label: "whofreelancer",
+            phrase: "Freelancer? Seeking freelancer?",
+            thread: whoFreelancer,
+          })
+        )
+      : Option.none(),
+  });
+};
+
+const getHnCategories = (
+  askDbRef: DatabaseReference,
+  user: User
+): Effect.Effect<HnJobs, Error> => pipe(
+        getLastThreads(askDbRef, user),
+        Effect.map((threads) => threads.flatMap((threadE) => {
+            if (Either.isRight(threadE)) {
+                return [threadE.right];
+            } else {
+                console.log("Not all job categories found: ", threadE.left);
+                return [];
+            }
+            })),
+        Effect.map(foundCategories => mapToCategories(foundCategories))
+      )
+
+export { enrichDetachedFlag, getHnCategories, getItemFromId, getItemsFromIds, getItemsFromQueryId, getItemsFromQueryIds, getKidItemsFromIds, getLastThreads, getThreadComments, mapToCategories };
 
