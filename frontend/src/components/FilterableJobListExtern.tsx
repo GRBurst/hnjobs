@@ -129,7 +129,7 @@ const ItemList = ({ items, tagFilters, searchFilter }: ItemListProps) => {
   );
 };
 
-interface FilterableJobListProps {
+interface FilterableJobListExternProps {
   items: Item[] | undefined
   parentItemId: number | undefined
   userId: string | undefined
@@ -140,7 +140,7 @@ interface FilterableJobListProps {
   searchFilter: string | undefined,
   updateSearchFilter: (needle: string | undefined) => void,
 }
-const FilterableJobList = ({
+const FilterableJobListExtern = ({
   items,
   parentItemId,
   userId,
@@ -150,7 +150,7 @@ const FilterableJobList = ({
   updateActiveTagFilters,
   searchFilter,
   updateSearchFilter,
-}: FilterableJobListProps) => {
+}: FilterableJobListExternProps) => {
   const flatActive = flatFilters(activeTagFilters);
 
   console.debug("ItemList: ", items);
@@ -217,6 +217,6 @@ const FilterableJobList = ({
   );
 };
 
-export { FilterableJobList };
+export { FilterableJobListExtern };
 
 
