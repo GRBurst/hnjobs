@@ -1,4 +1,4 @@
-import { Effect, pipe } from "effect";
+import { Effect, Option, pipe } from "effect";
 import { ref } from "firebase/database";
 import { useMemo, useState } from "react";
 import { useDatabase } from "reactfire";
@@ -24,7 +24,9 @@ export const WhoIsHiring = ({ filterTags, jobCategory }: WhoIsHiringProps) => {
       console.log("Getting thread: ", jobCategory.phrase);
       Effect.runPromise(
         pipe(
-          getThreadComments(dbRef, jobCategory.thread),
+          // Option.getOrElse(jobCategory.thread, Effect.fail("Couldn't find relevant thread")),
+          jobCategory.thread,
+          Effect.map(thread => getThreadComments(dbRef, thread)),
           Effect.flatMap((comments) => enrichDetachedFlag(dbRef, comments))
         )
       ).then((comments) => setThreadComments(comments));

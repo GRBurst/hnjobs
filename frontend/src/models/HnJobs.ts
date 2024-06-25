@@ -6,7 +6,7 @@ export interface HnJobCategory {
     readonly label: string
     readonly phrase: string
     readonly thread: Option.Option<Item>
-    receiveThread: () => Effect.Effect<Item[], Error>
+    receiveThread: Option.Option<() => Effect.Effect<Item[], Error>>
 }
 export const HnJobCategory = Data.case<HnJobCategory>()
 

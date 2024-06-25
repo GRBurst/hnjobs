@@ -112,49 +112,51 @@ const getLastThreads = (
     )
   );
 
+// Ask HN: Who is hiring?
+// Ask HN: Who wants to be hired?
+// Ask HN: Freelancer? Seeking freelancer?
 const mapToCategories = (threads: Item[]): HnJobs => {
-  const whoIsHiring: Item | undefined = threads.find((thread) =>
+  const whoIsHiring: Option.Option<Item> = Option.fromNullable(threads.find((thread) =>
     thread.title?.includes("Ask HN: Who is hiring?")
-  );
-  const whoWantsHired: Item | undefined = threads.find((thread) =>
+  ));
+  const whoWantsHired: Option.Option<Item> = Option.fromNullable(threads.find((thread) =>
     thread.title?.includes("Ask HN: Who wants to be hired?")
-  );
-  const whoFreelancer: Item | undefined = threads.find((thread) =>
+  ));
+  const whoFreelancer: Option.Option<Item> = Option.fromNullable(threads.find((thread) =>
     thread.title?.includes("Ask HN: Freelancer? Seeking freelancer?")
-  );
+  ));
   return HnJobs({
-    whoIsHiring: whoIsHiring
-      ? Option.some(
-          HnJobCategory({
-            id: whoIsHiring.id,
-            label: "whoishiring",
-            phrase: "Who is hiring?",
-            thread: whoIsHiring,
-          })
-        )
-      : Option.none(),
-    whoWantsHired: whoWantsHired
-      ? Option.some(
-          HnJobCategory({
-            id: whoWantsHired.id,
-            label: "whowantshired",
-            phrase: "Who wants to be hired?",
-            thread: whoWantsHired,
-          })
-        )
-      : Option.none(),
-    whoFreelancer: whoFreelancer
-      ? Option.some(
-          HnJobCategory({
-            id: whoFreelancer.id,
-            label: "whofreelancer",
-            phrase: "Freelancer? Seeking freelancer?",
-            thread: whoFreelancer,
-          })
-        )
-      : Option.none(),
+    whoIsHiring: Option.map(whoIsHiring, isHiring =>
+      HnJobCategory({
+        id: isHiring.id,
+        label: "whoishiring",
+        phrase: "Who is hiring?",
+        thread: whoIsHiring,
+        receiveThread: Option.none()
+      })
+    ),
+    whoWantsHired: Option.map(whoWantsHired, wantsHired =>
+      HnJobCategory({
+        id: wantsHired.id,
+        label: "whowantshired",
+        phrase: "Who wants to be hired?",
+        thread: whoWantsHired,
+        receiveThread: Option.none()
+      })
+    ),
+    whoFreelancer: Option.map(whoFreelancer,
+      freelancer =>
+        HnJobCategory({
+          id: freelancer.id,
+          label: "whofreelancer",
+          phrase: "Freelancer? Seeking freelancer?",
+          thread: whoFreelancer,
+          receiveThread: Option.none()
+        })
+    )
   });
-};
+}
+
 
 const getHnCategories = (
   askDbRef: DatabaseReference,

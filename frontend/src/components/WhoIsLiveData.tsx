@@ -3,7 +3,7 @@ import { ParseError } from "@effect/schema/ParseResult";
 import { Effect, Either, Option, pipe } from "effect";
 
 import { DatabaseReference, getDatabase, ref } from "firebase/database";
-import { lazy, useMemo, useState } from "react";
+import { createContext, lazy, useMemo, useState } from "react";
 import {
   DatabaseProvider,
   useDatabaseObjectData,
@@ -15,7 +15,7 @@ import { Tabs } from "antd";
 import { HnJobCategory, HnJobs } from "../models/HnJobs";
 import { Item, User } from "../models/Item";
 import { TagFilters } from "../models/TagFilter";
-import { getItemsFromIds } from "../utils/hn";
+import { getItemsFromIds, mapToCategories } from "../utils/hn";
 
 const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
 
@@ -39,54 +39,7 @@ const getLastThreads = (
     )
   );
 
-// Ask HN: Who is hiring?
-// Ask HN: Who wants to be hired?
-// Ask HN: Freelancer? Seeking freelancer?
-const mapToCategories = (threads: Item[]): HnJobs => {
-  const whoIsHiring: Item | undefined = threads.find((thread) =>
-    thread.title?.includes("Ask HN: Who is hiring?")
-  );
-  const whoWantsHired: Item | undefined = threads.find((thread) =>
-    thread.title?.includes("Ask HN: Who wants to be hired?")
-  );
-  const whoFreelancer: Item | undefined = threads.find((thread) =>
-    thread.title?.includes("Ask HN: Freelancer? Seeking freelancer?")
-  );
-  return HnJobs({
-    whoIsHiring: whoIsHiring
-      ? Option.some(
-          HnJobCategory({
-            id: whoIsHiring.id,
-            label: "whoishiring",
-            phrase: "Who is hiring?",
-            thread: whoIsHiring,
-          })
-        )
-      : Option.none(),
-    whoWantsHired: whoWantsHired
-      ? Option.some(
-          HnJobCategory({
-            id: whoWantsHired.id,
-            label: "whowantshired",
-            phrase: "Who wants to be hired?",
-            thread: whoWantsHired,
-          })
-        )
-      : Option.none(),
-    whoFreelancer: whoFreelancer
-      ? Option.some(
-          HnJobCategory({
-            id: whoFreelancer.id,
-            label: "whofreelancer",
-            phrase: "Freelancer? Seeking freelancer?",
-            thread: whoFreelancer,
-          })
-        )
-      : Option.none(),
-  });
-};
-
-// const FilterContext = createContext<Map<string, TagFilters>>(new Map());
+const FilterContext = createContext<Map<string, TagFilters>>(new Map());
 export interface WhoIsDataProps {
   filterTags: Map<string, TagFilters>;
 }
@@ -138,9 +91,9 @@ export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
 
   return (
     <DatabaseProvider sdk={db}>
-      {/* <FilterContext.Provider value={filterTags}> */}
-      <Tabs tabPosition="left" items={tabItems} />
-      {/* </FilterContext.Provider> */}
+      <FilterContext.Provider value={filterTags}>
+        <Tabs tabPosition="left" items={tabItems} />
+      </FilterContext.Provider>
     </DatabaseProvider>
   );
 };
