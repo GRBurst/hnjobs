@@ -14,7 +14,7 @@ import { locations, misc, role, technologies } from "../utils/predefined";
 
 const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
 const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
-const WhoIsData = lazy(() => import("./WhoIsLiveDataList"));
+const WhoIsData = lazy(() => import("./WhoIsLiveData"));
 
 const { Header, Sider, Content } = Layout;
 

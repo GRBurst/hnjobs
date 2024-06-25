@@ -1,3 +1,4 @@
+import { HashSet } from "effect";
 import { Item } from "../models/Item";
 import { TagFilter, TagFilters } from "../models/TagFilter";
 
@@ -40,3 +41,63 @@ const itemPrefilter = (items: Item[], parentFilter: number | undefined = undefin
 
 
 export { filterByRegex, filterByRegexAny, flatFilters, itemFilter, itemPrefilter };
+
+  const updateFilters = (
+    key: string,
+    tag: TagFilter,
+    allFilters: Map<string, TagFilters>,
+    update: (filters: TagFilters, tag: TagFilter) => TagFilters,
+    stateUpdate: (filters: Map<string, TagFilters>) => void
+  ): void => {
+    const oldFilters: TagFilters = allFilters.get(key) ?? HashSet.empty();
+    const newFilters: TagFilters = update(oldFilters, tag);
+    allFilters.set(key, newFilters);
+    stateUpdate(new Map([...allFilters]));
+  };
+
+  const addFilters = (
+    key: string,
+    tag: TagFilter,
+    allFilters: Map<string, TagFilters>,
+    stateUpdate: (filters: Map<string, TagFilters>) => void
+  ) => {
+    updateFilters(
+      key,
+      tag,
+      allFilters,
+      (filters: TagFilters, tag: TagFilter) =>
+        HashSet.fromIterable([...filters, tag]),
+      stateUpdate
+    );
+  };
+  const removeFilters = (
+    key: string,
+    tag: TagFilter,
+    allFilters: Map<string, TagFilters>,
+    stateUpdate: (filters: Map<string, TagFilters>) => void
+  ) => {
+    updateFilters(
+      key,
+      tag,
+      allFilters,
+      (filters: TagFilters, tag: TagFilter) =>
+        HashSet.filter(filters, (item) => item !== tag),
+      stateUpdate
+    );
+  };
+
+  const filterIntersection = (
+    allFilters: Map<string, TagFilters>,
+    activeFilters: Map<string, TagFilters>
+  ): Map<string, TagFilters> => {
+    const intersectionMap = new Map<string, TagFilters>();
+    allFilters.forEach((filters, key) =>
+      intersectionMap.set(
+        key,
+        HashSet.intersection(filters, activeFilters.get(key) ?? HashSet.empty())
+      )
+    );
+    return intersectionMap;
+  };
+
+export { updateFilters, addFilters, removeFilters, filterIntersection };
