@@ -8,11 +8,11 @@ import { TagFilters } from "../models/TagFilter";
 import { enrichDetachedFlag, getThreadComments } from "../utils/hn";
 import { FilterableJobList } from "./FilterableJobList";
 
-export interface WhoIsHiringProps {
+interface WhoIsHiringProps {
   filterTags: Map<string, TagFilters>;
   jobCategory: HnJobCategory;
 }
-export const WhoIsHiring = ({ filterTags, jobCategory }: WhoIsHiringProps) => {
+const WhoIsHiring = ({ filterTags, jobCategory }: WhoIsHiringProps) => {
   const [threadComments, setThreadComments] = useState<Item[] | undefined>(
     undefined
   );
@@ -26,22 +26,21 @@ export const WhoIsHiring = ({ filterTags, jobCategory }: WhoIsHiringProps) => {
         pipe(
           // Option.getOrElse(jobCategory.thread, Effect.fail("Couldn't find relevant thread")),
           jobCategory.thread,
-          Effect.map(thread => getThreadComments(dbRef, thread)),
+          Effect.flatMap(thread => getThreadComments(dbRef, thread)),
           Effect.flatMap((comments) => enrichDetachedFlag(dbRef, comments))
         )
       ).then((comments) => setThreadComments(comments));
     }
   }, [dbRef, jobCategory.thread]);
 
-  return jobCategory && threadComments ? (
-    <FilterableJobList
-      items={threadComments}
-      parentItemId={jobCategory.thread.id}
-      userId={undefined}
-      filterTags={filterTags}
-    />
-  ) : (
-    <></>
+  if (!jobCategory || !threadComments || Option.isNone(jobCategory.thread)) return <></>
+
+  return (<FilterableJobList
+    items={threadComments}
+    parentItemId={Option.getOrUndefined(Option.map(jobCategory.thread, thread => thread.id))}
+    userId={undefined}
+    filterTags={filterTags}
+  />
   );
 };
 export default WhoIsHiring;

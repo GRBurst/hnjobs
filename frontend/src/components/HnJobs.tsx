@@ -125,8 +125,8 @@ const HnJobs = () => {
               ></Menu>
             </Sider>
             <Content>
-              {/* <WhoIsData filterTags={predefinedFilterTags} /> */}
-              {getList(import.meta.env.VITE_DATA_SOURCE)}
+              <WhoIsData filterTags={predefinedFilterTags} />
+              {/* {getList(import.meta.env.VITE_DATA_SOURCE)} */}
             </Content>
           </Layout>
         </App>
