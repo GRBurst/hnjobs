@@ -1,5 +1,5 @@
+
 import { Flex, FloatButton, List, Slider } from "antd";
-import { HashSet } from "effect";
 import { CSSProperties, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { DesignPaletteIcon } from "./Icons";
@@ -13,10 +13,13 @@ import {
 } from "../models/TagFilter";
 import { AppConfig } from "../utils/config";
 import {
+  addFilters,
   filterByRegexAny,
+  filterIntersection,
   flatFilters,
   itemFilter,
   itemPrefilter,
+  removeFilters,
 } from "../utils/filters";
 import { JobStatistics } from "./JobStatistics";
 import { TagFilterDrawer } from "./TagFilterBar";
@@ -130,81 +133,25 @@ interface FilterableJobListProps {
   items: Item[] | undefined
   parentItemId: number | undefined
   userId: string | undefined
-  filterTags: Map<string, TagFilters>
+  tagFilters: Map<string, TagFilters>
+  updateTagFilters: (filters: Map<string, TagFilters>) => void
+  activeTagFilters: Map<string, TagFilters>
+  updateActiveTagFilters: (filters: Map<string, TagFilters>) => void
+  searchFilter: string | undefined,
+  updateSearchFilter: (needle: string | undefined) => void,
 }
 const FilterableJobList = ({
   items,
   parentItemId,
   userId,
-  filterTags,
+  tagFilters,
+  updateTagFilters,
+  activeTagFilters,
+  updateActiveTagFilters,
+  searchFilter,
+  updateSearchFilter,
 }: FilterableJobListProps) => {
-  const [allTagFilters, setAllTagFilters] =
-    useState<Map<string, TagFilters>>(filterTags);
-  const [activeTagFilters, setActiveTagFilters] = useState<
-    Map<string, TagFilters>
-  >(new Map());
-  const [searchFilter, setSearchFilter] = useState<string | undefined>(
-    undefined
-  );
   const flatActive = flatFilters(activeTagFilters);
-
-  const updateFilters = (
-    key: string,
-    tag: TagFilter,
-    allFilters: Map<string, TagFilters>,
-    update: (filters: TagFilters, tag: TagFilter) => TagFilters,
-    stateUpdate: (filters: Map<string, TagFilters>) => void
-  ): void => {
-    const oldFilters: TagFilters = allFilters.get(key) ?? HashSet.empty();
-    const newFilters: TagFilters = update(oldFilters, tag);
-    allFilters.set(key, newFilters);
-    stateUpdate(new Map([...allFilters]));
-  };
-
-  const addFilters = (
-    key: string,
-    tag: TagFilter,
-    allFilters: Map<string, TagFilters>,
-    stateUpdate: (filters: Map<string, TagFilters>) => void
-  ) => {
-    updateFilters(
-      key,
-      tag,
-      allFilters,
-      (filters: TagFilters, tag: TagFilter) =>
-        HashSet.fromIterable([...filters, tag]),
-      stateUpdate
-    );
-  };
-  const removeFilters = (
-    key: string,
-    tag: TagFilter,
-    allFilters: Map<string, TagFilters>,
-    stateUpdate: (filters: Map<string, TagFilters>) => void
-  ) => {
-    updateFilters(
-      key,
-      tag,
-      allFilters,
-      (filters: TagFilters, tag: TagFilter) =>
-        HashSet.filter(filters, (item) => item !== tag),
-      stateUpdate
-    );
-  };
-
-  const filterIntersection = (
-    allFilters: Map<string, TagFilters>,
-    activeFilters: Map<string, TagFilters>
-  ): Map<string, TagFilters> => {
-    const intersectionMap = new Map<string, TagFilters>();
-    allFilters.forEach((filters, key) =>
-      intersectionMap.set(
-        key,
-        HashSet.intersection(filters, activeFilters.get(key) ?? HashSet.empty())
-      )
-    );
-    return intersectionMap;
-  };
 
   console.debug("ItemList: ", items);
   const cleansedItems =
@@ -222,37 +169,37 @@ const FilterableJobList = ({
   return (
     <>
       <TagFilterDrawer
-        allTags={allTagFilters}
-        activeTags={filterIntersection(allTagFilters, activeTagFilters)}
+        allTags={tagFilters}
+        activeTags={filterIntersection(tagFilters, activeTagFilters)}
         onActive={(key: string, tag: TagFilter) =>
-          addFilters(key, tag, activeTagFilters, setActiveTagFilters)
+          addFilters(key, tag, activeTagFilters, updateActiveTagFilters)
         }
         onInactive={(key: string, tag: TagFilter) =>
-          removeFilters(key, tag, activeTagFilters, setActiveTagFilters)
+          removeFilters(key, tag, activeTagFilters, updateActiveTagFilters)
         }
         onTagAdd={(key: string, tag: TagFilter) => {
-          addFilters(key, tag, allTagFilters, setAllTagFilters);
+          addFilters(key, tag, tagFilters, updateTagFilters);
           localStorage.setItem(
             AppConfig.tagFilters.custom.localStorageKey,
             JSON.stringify(
               Array.from(
-                allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []
+                tagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []
               ).map((f) => tagFilterToString(f))
             )
           );
         }}
         onTagRemove={(key: string, tag: TagFilter) => {
-          removeFilters(key, tag, allTagFilters, setAllTagFilters);
+          removeFilters(key, tag, tagFilters, updateTagFilters);
           localStorage.setItem(
             AppConfig.tagFilters.custom.localStorageKey,
             JSON.stringify(
               Array.from(
-                allTagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []
+                tagFilters.get(AppConfig.tagFilters.custom.sectionName) ?? []
               ).map((f) => tagFilterToString(f))
             )
           );
         }}
-        onSearch={(needle: string | undefined) => setSearchFilter(needle)}
+        onSearch={(needle: string | undefined) => updateSearchFilter(needle)}
         visualizer={
           <JobStatistics
             allItems={cleansedItems ?? []}
@@ -271,3 +218,5 @@ const FilterableJobList = ({
 };
 
 export { FilterableJobList };
+
+
