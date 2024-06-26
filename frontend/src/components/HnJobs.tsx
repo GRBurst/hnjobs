@@ -1,4 +1,4 @@
-import { HashSet as HSet } from "effect";
+import { Effect, Option, HashSet as HSet } from "effect";
 import type { HashSet } from "effect/HashSet";
 
 import { lazy, useEffect, useState } from "react";
@@ -11,15 +11,20 @@ import { GithubIcon } from "./Icons";
 import { UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
 import { AppConfig } from "../utils/config";
 import { locations, misc, role, technologies } from "../utils/predefined";
+import { HnJobCategory, HnJobs as HnJobsData } from "../models/HnJobs";
 
-const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
-const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
-const WhoIsData = lazy(() => import("./WhoIsLiveData"));
+// const FilterableLocalList = lazy(() => import("./FilterableLocalList"));
+// const FilterableSqliteList = lazy(() => import("./FilterableSqliteList"));
+// const WhoIsData = lazy(() => import("./WhoIsLiveData"));
+import { getWhoIsData } from "./WhoIsLiveData";
+import { DatabaseProvider } from "reactfire";
+const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
 
 const { Header, Sider, Content } = Layout;
 
 const HnJobs = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [hnJobMenu, setHnJobMenu] = useState<Option.Option<string>>(Option.none());
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
@@ -28,17 +33,19 @@ const HnJobs = () => {
   predefinedFilterTags.set("Role", role);
   predefinedFilterTags.set("Misc", misc);
 
-  const getList = (source: string): JSX.Element => {
-    if (source == "local") {
-      console.debug("Getting jobs from static json file.");
-      return <FilterableLocalList filterTags={predefinedFilterTags} />;
-    } else if (source == "sqlite") {
-      console.debug("Getting jobs from static sqlite db.");
-      return <FilterableSqliteList filterTags={predefinedFilterTags} />;
-    } else {
-      console.debug("Getting jobs live from hackernews.");
-      return <WhoIsData filterTags={predefinedFilterTags} />;
-    }
+  const getList = (source: string, key: Option.Option<string>): Effect.Effect<HnJobsData, Error> => {
+    // if (source == "local") {
+    //   console.debug("Getting jobs from static json file.");
+    //   return <FilterableLocalList filterTags={predefinedFilterTags} />;
+    // } else if (source == "sqlite") {
+    //   console.debug("Getting jobs from static sqlite db.");
+    //   return <FilterableSqliteList filterTags={predefinedFilterTags} />;
+    // } else {
+    //   console.debug("Getting jobs live from hackernews.");
+    //   return <WhoIsData filterTags={predefinedFilterTags} menuKey={key} />;
+    //   return getWhoIsData();
+    // }
+    return getWhoIsData();
   };
 
   useEffect(() => {
@@ -76,6 +83,42 @@ const HnJobs = () => {
     }
   }, []);
 
+  const jobsE: Effect.Effect<HnJobsData, Error> = getList(import.meta.env.VITE_DATA_SOURCE, hnJobMenu)
+
+  const foundCategories: Effect.Effect<HnJobCategory[], Error> =
+    Effect.map(jobsE, jobs =>
+      Object.values(jobs)
+        .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
+        .map((c: Option.Some<HnJobCategory>) => c.value)
+    );
+
+  console.log("Found categories: ", foundCategories);
+  if (!foundCategories) return <></>;
+
+  const jobContent = foundCategories
+    .find(category => Option.getOrElse(
+      Option.map(hnJobMenu, job => job === category.id.toString()),
+      () => false))
+
+  if (!jobContent) return <></>
+
+  const jobContentNode = <WhoIsHiring filterTags={predefinedFilterTags} jobCategory={jobContent} />
+
+  const jobMenu = foundCategories.map((category) => ({
+    key: category.id.toString(),
+    label: category.phrase,
+  }));
+
+
+  // const jobContent = <WhoIsHiring filterTags={filterTags} jobCategory={category} />,
+  // return (
+  //   <DatabaseProvider sdk={db}>
+  //     <FilterContext.Provider value={filterTags}>
+  //       {job}
+  //     </FilterContext.Provider>
+  //   </DatabaseProvider>
+  // );
+
   return (
     <>
       <ConfigProvider
@@ -109,24 +152,16 @@ const HnJobs = () => {
           <Layout>
             <Sider trigger={null} collapsible>
               <Menu
-                items={[
-                  {
-                    key: "1",
-                    icon: <UserOutlined />,
-
-                    label: "nav 1",
-                  },
-                  {
-                    key: "2",
-                    icon: <VideoCameraOutlined />,
-                    label: "nav 2",
-                  },
-                ]}
+                items={jobMenu}
+                // onClick={({ item, key, keyPath, domEvent }) => console.log(`Key: ${key}, Item: ${item}, path: ${keyPath}`)}
+                // onClick={(foo) => console.log("Menu: ", foo)}
+                onClick={(menu) => setHnJobMenu(Option.some(menu.key))}
               ></Menu>
             </Sider>
             <Content>
-              <WhoIsData filterTags={predefinedFilterTags} />
-              {/* {getList(import.meta.env.VITE_DATA_SOURCE)} */}
+              {jobContentNode}
+              {/* <WhoIsData filterTags={predefinedFilterTags} menuKey={hnJobMenu} /> */}
+              {/* {getList(import.meta.env.VITE_DATA_SOURCE, hnJobMenu)} */}
             </Content>
           </Layout>
         </App>

@@ -15,36 +15,21 @@ import { Tabs } from "antd";
 import { HnJobCategory, HnJobs } from "../models/HnJobs";
 import { Item, User } from "../models/Item";
 import { TagFilters } from "../models/TagFilter";
-import { getItemsFromIds, mapToCategories } from "../utils/hn";
+import { getLastThreads, mapToCategories } from "../utils/hn";
 
-const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
-
-const getLastThreads = (
-  askDbRef: DatabaseReference,
-  user: User
-): Effect.Effect<Either.Either<Item, ParseError>[], Error> =>
-  pipe(
-    getItemsFromIds(
-      askDbRef,
-      user.submitted?.slice(0, 3) ?? [],
-      (n: number) => n
-    ),
-    Effect.tap(([whoIsHiring, freelancer, whoWantsHiring]) => {
-      console.log(whoIsHiring.title);
-      console.log(freelancer.title);
-      console.log(whoWantsHiring.title);
-    }),
-    Effect.map((asks) =>
-      asks.map((ask) => Schema.decodeUnknownEither(Item)(ask))
-    )
-  );
-
-const FilterContext = createContext<Map<string, TagFilters>>(new Map());
-export interface WhoIsDataProps {
-  filterTags: Map<string, TagFilters>;
+const constructHnJobs = (threads: Either.Either<Item, ParseError>[]): HnJobs => {
+  const foundCategories: Item[] = threads.flatMap((threadE) => {
+    if (Either.isRight(threadE)) {
+      return [threadE.right];
+    } else {
+      console.log("Not all job categories found: ", threadE.left);
+      return [];
+    }
+  });
+  return mapToCategories(foundCategories);
 }
-export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
-  const [threads, setThreads] = useState<HnJobs | undefined>(undefined);
+
+export const getWhoIsData = (): Effect.Effect<HnJobs, Error> => {
 
   const whoishiring = "whoishiring";
   const userRef = `v0/user/${whoishiring}`;
@@ -58,44 +43,38 @@ export const WhoIsData = ({ filterTags }: WhoIsDataProps) => {
   const { status: endpointStatus, data: userData } =
     useDatabaseObjectData<User>(userEndpointRef);
 
-  useMemo(() => {
-    if (endpointStatus == "success") {
-      Effect.runPromise(getLastThreads(dbRef, userData)).then((threads) => {
-        const foundCategories: Item[] = threads.flatMap((threadE) => {
-          if (Either.isRight(threadE)) {
-            return [threadE.right];
-          } else {
-            console.log("Not all job categories found: ", threadE.left);
-            return [];
-          }
-        });
-        setThreads(mapToCategories(foundCategories));
-      });
-    }
-  }, [dbRef, endpointStatus, userData]);
+  if (endpointStatus !== "success") return Option.none()
 
-  if (!threads) return <></>;
+  return pipe(
+    getLastThreads(dbRef, userData),
+    Effect.map(threads => constructHnJobs(threads))
+  )
 
-  const foundCategories: HnJobCategory[] = Object.values(threads)
-    .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
-    .map((c: Option.Some<HnJobCategory>) => c.value);
 
-  console.log("Found categories: ", foundCategories);
-  if (!foundCategories) return <></>;
+  // const foundCategories: HnJobCategory[] = Object.values(threads)
+  //   .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
+  //   .map((c: Option.Some<HnJobCategory>) => c.value);
 
-  const tabItems = foundCategories.map((category) => ({
-    key: category.id.toString(),
-    label: category.phrase,
-    children: [<WhoIsHiring filterTags={filterTags} jobCategory={category} />],
-  }));
+  // console.log("Found categories: ", foundCategories);
+  // if (!foundCategories) return <></>;
 
-  return (
-    <DatabaseProvider sdk={db}>
-      <FilterContext.Provider value={filterTags}>
-        <Tabs tabPosition="left" items={tabItems} />
-      </FilterContext.Provider>
-    </DatabaseProvider>
-  );
+  // const tabItems = foundCategories.map((category) => ({
+  //   key: category.id.toString(),
+  //   label: category.phrase,
+  //   children: [<WhoIsHiring filterTags={filterTags} jobCategory={category} />],
+  // }));
+  // const content = foundCategories.map((category) => ({
+  //   menuKey.map()
+  //   <WhoIsHiring filterTags={filterTags} jobCategory={category}],
+  // }));
+
+  // return (
+  //   <DatabaseProvider sdk={db}>
+  //     <FilterContext.Provider value={filterTags}>
+  //       {content}
+  //     </FilterContext.Provider>
+  //   </DatabaseProvider>
+  // );
 };
 
-export default WhoIsData;
+// export default WhoIsData;
