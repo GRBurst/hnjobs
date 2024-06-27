@@ -1,4 +1,4 @@
-import { Effect, Option, HashSet as HSet } from "effect";
+import { pipe, Effect, Option, HashSet as HSet } from "effect";
 import type { HashSet } from "effect/HashSet";
 
 import { lazy, useEffect, useState } from "react";
@@ -48,6 +48,49 @@ const HnJobs = () => {
     return getWhoIsData();
   };
 
+  const foundCategories: Effect.Effect<HnJobCategory[], Error> = pipe(
+    // const found = pipe(
+    getList(import.meta.env.VITE_DATA_SOURCE, hnJobMenu), // Effect.Effect<HnJobsData, Error>
+    Effect.map((jobs: HnJobsData) =>
+      Object.values(jobs)
+        .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
+        .map((c: Option.Option<HnJobCategory>) => Option.getOrThrow(c))
+    ),
+    Effect.tap((foundCategories: HnJobCategory[]) => console.log("Found categories: ", foundCategories)),
+    // Effect.map(foundCategories => )
+  );
+
+  // console.log("Found categories: ", foundCategories);
+  // if (!foundCategories) return <></>;
+
+  const jobContent = Effect.map(foundCategories, categories =>
+    categories.find(category => Option.getOrElse(
+      Option.map(hnJobMenu, job => job === category.id.toString()),
+      () => false))
+  )
+
+  if (!jobContent) return <></>
+
+  const jobContentNode = Effect.map(jobContent, job => job !== undefined ?
+    <WhoIsHiring filterTags={predefinedFilterTags} jobCategory={job} /> : <></>
+  )
+
+  const jobMenu = Effect.map(foundCategories, categories => categories.map((category) => ({
+    key: category.id.toString(),
+    label: category.phrase,
+  })));
+
+
+  // const jobContent = <WhoIsHiring filterTags={filterTags} jobCategory={category} />,
+  // return (
+  //   <DatabaseProvider sdk={db}>
+  //     <FilterContext.Provider value={filterTags}>
+  //       {job}
+  //     </FilterContext.Provider>
+  //   </DatabaseProvider>
+  // );
+
+
   useEffect(() => {
     // Set mode to value during mount
     const prefersDarkMode = window.matchMedia(
@@ -82,42 +125,6 @@ const HnJobs = () => {
       }
     }
   }, []);
-
-  const jobsE: Effect.Effect<HnJobsData, Error> = getList(import.meta.env.VITE_DATA_SOURCE, hnJobMenu)
-
-  const foundCategories: Effect.Effect<HnJobCategory[], Error> =
-    Effect.map(jobsE, jobs =>
-      Object.values(jobs)
-        .filter((category: Option.Option<HnJobCategory>) => Option.isSome(category))
-        .map((c: Option.Some<HnJobCategory>) => c.value)
-    );
-
-  console.log("Found categories: ", foundCategories);
-  if (!foundCategories) return <></>;
-
-  const jobContent = foundCategories
-    .find(category => Option.getOrElse(
-      Option.map(hnJobMenu, job => job === category.id.toString()),
-      () => false))
-
-  if (!jobContent) return <></>
-
-  const jobContentNode = <WhoIsHiring filterTags={predefinedFilterTags} jobCategory={jobContent} />
-
-  const jobMenu = foundCategories.map((category) => ({
-    key: category.id.toString(),
-    label: category.phrase,
-  }));
-
-
-  // const jobContent = <WhoIsHiring filterTags={filterTags} jobCategory={category} />,
-  // return (
-  //   <DatabaseProvider sdk={db}>
-  //     <FilterContext.Provider value={filterTags}>
-  //       {job}
-  //     </FilterContext.Provider>
-  //   </DatabaseProvider>
-  // );
 
   return (
     <>
