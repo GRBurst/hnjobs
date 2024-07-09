@@ -1,7 +1,7 @@
 import { pipe, Effect, Option, HashSet as HSet } from "effect";
 import type { HashSet } from "effect/HashSet";
 
-import { lazy, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useMemo, useState } from "react";
 
 import { App, ConfigProvider, Layout, Menu, theme } from "antd";
 
@@ -18,6 +18,7 @@ import { HnJobCategory, HnJobs as HnJobsData } from "../models/HnJobs";
 // const WhoIsData = lazy(() => import("./WhoIsLiveData"));
 import { getWhoIsData } from "./WhoIsLiveData";
 import { DatabaseProvider } from "reactfire";
+import { ItemType, MenuItemType } from "antd/es/menu/interface";
 const WhoIsHiring = lazy(() => import("./WhoIsHiring"));
 
 const { Header, Sider, Content } = Layout;
@@ -25,6 +26,8 @@ const { Header, Sider, Content } = Layout;
 const HnJobs = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [hnJobMenu, setHnJobMenu] = useState<Option.Option<string>>(Option.none());
+  const [hnJob, setHnJobM] = useState<Option.Option<string>>(Option.none());
+  const [hnJobMenuItems, setHnJobMenuItems] = useState<Option.Option<string>>(Option.none());
   const { defaultAlgorithm, darkAlgorithm } = theme;
 
   const predefinedFilterTags = new Map<string, HashSet<TagFilter>>();
@@ -75,10 +78,11 @@ const HnJobs = () => {
     <WhoIsHiring filterTags={predefinedFilterTags} jobCategory={job} /> : <></>
   )
 
-  const jobMenu = Effect.map(foundCategories, categories => categories.map((category) => ({
+  const jobMenu: Effect.Effect<ItemType<MenuItemType>[], Error, never> = Effect.map(foundCategories, categories => categories.map((category) => ({
     key: category.id.toString(),
     label: category.phrase,
   })));
+
 
 
   // const jobContent = <WhoIsHiring filterTags={filterTags} jobCategory={category} />,
@@ -90,6 +94,23 @@ const HnJobs = () => {
   //   </DatabaseProvider>
   // );
 
+  // const hnJobCategoryData = useMemo(() => { 
+  //   pipe(
+  //   jobContentNode,
+  //   Effect.map(jobContent => ),
+  //   )
+  // }, [jobContentNode])
+  // const hnJobMenuChoice = useMemo(() => { Effect.runSync(jobMenu) }, [jobMenu])
+
+  useMemo(() =>
+    Effect.runPromise(jobContentNode)
+      .then(jc => setHnJobM(jc))
+    , [jobContentNode])
+
+  const hnJobMenuItems = useMemo(() => Effect.runPromise(pipe(
+    jobMenu,
+    Effect.map(jm => jm ? jm : <></>)
+  )), [jobMenu])
 
   useEffect(() => {
     // Set mode to value during mount
@@ -159,14 +180,16 @@ const HnJobs = () => {
           <Layout>
             <Sider trigger={null} collapsible>
               <Menu
-                items={jobMenu}
+                items={hnJobMenuItems}
                 // onClick={({ item, key, keyPath, domEvent }) => console.log(`Key: ${key}, Item: ${item}, path: ${keyPath}`)}
                 // onClick={(foo) => console.log("Menu: ", foo)}
                 onClick={(menu) => setHnJobMenu(Option.some(menu.key))}
               ></Menu>
             </Sider>
             <Content>
-              {jobContentNode}
+              {/* {jobContentNode} */}
+              {/* {hnJobCategoryData} */}
+              {hnJob}
               {/* <WhoIsData filterTags={predefinedFilterTags} menuKey={hnJobMenu} /> */}
               {/* {getList(import.meta.env.VITE_DATA_SOURCE, hnJobMenu)} */}
             </Content>
